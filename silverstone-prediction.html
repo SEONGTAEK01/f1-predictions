@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2026 영국 GP · 포디움 예측 대시보드 (Silverstone)</title>
+<style>
+  :root{
+    --mer:#27F4D2; --fer:#FF2D2D; --rbr:#3671C6; --mcl:#FF8000; --rb:#6692FF;
+    --bg:#0a0e14; --card:#11161f; --card2:#161d28; --line:#222c3a;
+    --txt:#e6edf3; --muted:#8b97a7; --gold:#FFD23F;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:
+      radial-gradient(1200px 600px at 80% -10%, #16314a55, transparent),
+      radial-gradient(900px 500px at 0% 0%, #2a103a44, transparent),
+      var(--bg);
+    color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo",Roboto,sans-serif;
+    line-height:1.5;min-height:100vh;padding:28px 20px 60px}
+  .wrap{max-width:1080px;margin:0 auto}
+  header.top{margin-bottom:22px}
+  .kik{color:var(--gold);font-weight:800;font-size:12px;letter-spacing:2px;text-transform:uppercase}
+  h1{font-size:30px;letter-spacing:-.5px;margin:6px 0 8px}
+  .meta{color:var(--muted);font-size:13px}
+  .meta b{color:var(--txt)}
+  /* fact strip */
+  .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0}
+  .fact{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .fact h4{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .fact .big{font-size:15px;font-weight:700;margin-bottom:4px}
+  .fact .sub{font-size:12px;color:var(--muted);line-height:1.5}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;margin:2px 3px 0 0}
+  /* sprint strip */
+  .sprint{background:linear-gradient(180deg,#1a1420,var(--card));border:1px solid var(--line);border-left:3px solid var(--gold);
+    border-radius:12px;padding:12px 16px;margin:2px 0 4px;font-size:13px;line-height:1.65;color:#cdd6e0}
+  .sprint b{color:var(--gold)}
+  /* tabs */
+  .tabs{display:flex;gap:8px;margin:26px 0 6px;flex-wrap:wrap}
+  .tab{flex:1;min-width:160px;background:var(--card);border:1px solid var(--line);border-radius:13px;
+    padding:13px 15px;cursor:pointer;transition:.15s;text-align:left}
+  .tab:hover{border-color:#3a4658}
+  .tab.on{border-color:var(--gold);background:linear-gradient(180deg,#1c1a10,var(--card))}
+  .tab .nm{font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px}
+  .tab .lk{color:var(--muted);font-size:12px;margin-top:6px}
+  .bar{height:6px;border-radius:4px;background:#243; margin-top:7px;overflow:hidden;background:#1b2433}
+  .bar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gold),#ff8a3d)}
+  /* podium panel */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;margin-top:14px}
+  .ph{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+  .ph h2{font-size:20px}
+  .ph .tag{font-size:13px;color:var(--muted)}
+  .podium{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:14px;align-items:end;max-width:680px;margin:0 auto 8px}
+  .step{border-radius:14px 14px 0 0;padding:16px 12px;text-align:center;position:relative;border:1px solid #ffffff14;border-bottom:none}
+  .step .pos{font-size:30px;font-weight:900;opacity:.35;line-height:1}
+  .step .drv{font-size:18px;font-weight:800;margin-top:8px}
+  .step .team{font-size:12px;font-weight:700;margin-top:3px;opacity:.95}
+  .step .gap{font-size:11px;color:#0008;margin-top:4px;font-weight:700}
+  .s1{min-height:180px} .s2{min-height:140px} .s3{min-height:118px}
+  .crown{position:absolute;top:-26px;left:50%;transform:translateX(-50%);font-size:22px}
+  .dark{margin:14px auto 0;max-width:680px;background:var(--card2);border:1px dashed var(--line);
+    border-radius:12px;padding:10px 14px;font-size:13px}
+  .dark b{color:var(--gold)}
+  .why{margin-top:16px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:15px 17px;
+    font-size:13.5px;line-height:1.75;color:#cdd6e0}
+  /* swing factors */
+  .swing{margin-top:26px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+  .swing h3{font-size:16px;margin-bottom:12px}
+  .sf{display:flex;gap:11px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.6}
+  .sf:last-child{border:none}
+  .sf .ic{font-size:16px;flex-shrink:0}
+  .sf b{color:#fff}
+  footer{margin-top:26px;color:var(--muted);font-size:11.5px;line-height:1.7;border-top:1px solid var(--line);padding-top:16px}
+  footer a{color:#7db3ff;text-decoration:none}
+  .grid-list{font-size:12.5px;color:#cdd6e0;line-height:1.9}
+  .gnum{display:inline-block;width:22px;color:var(--muted);font-weight:700}
+  @media(max-width:720px){.facts{grid-template-columns:1fr}.podium{max-width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="kik">🏁 Formula 1 · 시즌 9번째 경기 / 24 · Silverstone · 스프린트 주간</div>
+    <h1>2026 영국 GP — 누가 시상대에 오를까</h1>
+    <div class="meta">결승 <b>7월 5일(일) 오후 3시</b> 현지 · 52바퀴 · 5.891km · <b>AI 에이전트 17개</b>가 출발 순서·연습 기록·날씨·타이어·팀 상태·역사 기록을 모으고, 중요한 사실은 <b>일부러 반박해 보며 다시 확인</b>했어요 · 아래 3가지 경우로 정리</div>
+  </header>
+
+  <!-- SPRINT CONTEXT -->
+  <div class="sprint">🔴 <b>토요일 스프린트</b> (짧은 레이스, 실버스톤에선 2021년 이후 처음) — 스프린트 1번 출발은 <b style="color:var(--fer)">해밀턴</b>(1분28.376초)이었지만, <b style="color:var(--mer)">안토넬리</b>가 8바퀴째 <b>행어 직선에서 배터리 힘을 몰아 써(부스트) 추월</b>, 2.7초 차로 데뷔 첫 스프린트 우승을 했어요. 순서는 안토넬리·해밀턴·노리스·러셀·르클레르·베르스타펜. 리타이어도 세이프티카도 없었습니다. → 안토넬리의 챔피언십 선두 격차가 <b>40점 → 43점</b>으로 벌어졌고(안토넬리 179 / 러셀 136 / 해밀턴 132), 팀 순위는 메르세데스 315 · 페라리 215. <b>금요일 연습에선 페라리가 빨라 보였지만, 스프린트에서 진짜 레이스 속도는 메르세데스가 제일 빠르다는 게 드러났어요.</b> 일요일 출발 순서는 별도 예선으로 정해지니 스프린트 결과가 바꾸지 않습니다.</div>
+
+  <!-- VERIFIED FACTS -->
+  <div class="facts">
+    <div class="fact">
+      <h4>✅ 확정 출발 순서 (앞 8명 벌점 없음)</h4>
+      <div class="grid-list">
+        <span class="gnum">P1</span><b style="color:var(--mer)">안토넬리</b> · 1번 출발(폴) 1:28.111<br>
+        <span class="gnum">P2</span><span style="color:var(--fer)">르클레르</span> +0.175<br>
+        <span class="gnum">P3</span><span style="color:var(--fer)">해밀턴</span> +0.347 <span style="color:var(--muted)">(스프린트 땐 1번 출발)</span><br>
+        <span class="gnum">P4</span><span style="color:var(--mer)">러셀</span> +0.370 <span style="color:var(--muted)">(예선 때 벽 살짝 접촉·직선 0.3초 느림)</span><br>
+        <span class="gnum">P5</span><span style="color:var(--rbr)">하자르</span> +0.635<br>
+        <span class="gnum">P6</span><span style="color:var(--mcl)">노리스</span> · <span class="gnum">P7</span><span style="color:var(--rbr)">베르스타펜</span> · <span class="gnum">P8</span><span style="color:var(--mcl)">피아스트리</span><br>
+        <span style="color:var(--muted);font-size:11px">벌점은 가슬리(3계단, P15)뿐 — 앞 순위엔 영향 없음</span>
+      </div>
+    </div>
+    <div class="fact">
+      <h4>☀️ 레이스 날씨</h4>
+      <div class="big">맑고 건조</div>
+      <div class="sub">비 올 확률 ≈ <b style="color:var(--txt)">0%</b> (많아야 7%) · 기온 24–27°C<br>노면 <b style="color:#ff8a3d">~40°C</b> · 바람 약함 (돌풍만 조금)<br>→ 비 잦은 실버스톤인데 <b>드물게 완전히 마른 레이스</b>. 딱딱한 타이어로 <b>1번만 교체</b>하는 단순한 전략 예상</div>
+    </div>
+    <div class="fact">
+      <h4>⏱ 진짜 레이스 속도 (스프린트가 보여줌)</h4>
+      <div class="sub">
+        1. <b style="color:var(--mer)">안토넬리</b> — 스프린트 우승 (<b>배터리 힘을 잘 배분</b>)<br>
+        2. <b style="color:var(--fer)">해밀턴</b> — 스프린트 2위 · 페라리 중 제일 빠름<br>
+        3. <span style="color:var(--mcl)">노리스</span> — 6번 출발→스프린트 3위 (타이어 관리)<br>
+        4. <span style="color:var(--mer)">러셀</span> 직선 0.3초 느린 게 발목 · 5. <span style="color:var(--fer)">르클레르</span> 한 바퀴는 빠르나 레이스에선 배터리 약점<br>
+        <span style="color:var(--muted);font-size:11px">※ '타이어를 제일 덜 닳게 쓴다'는 아직 확인 안 됨 — 강점은 배터리 힘 배분에서 나옴</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENARIO TABS -->
+  <div class="tabs" id="tabs"></div>
+  <div class="panel" id="panel"></div>
+
+  <!-- SWING FACTORS -->
+  <div class="swing">
+    <h3>🎚 결과를 가르는 핵심 변수</h3>
+    <div class="sf"><span class="ic">🔋</span><div><b>메르세데스의 배터리 힘 배분</b> — 안토넬리의 스프린트 우승은 직선에서 배터리 힘을 몰아 쓴(부스트) 덕분이었어요. 직선 끝에서 배터리가 바닥나는 이 서킷에선 이 능력이 가장 큰 무기라, <b>앞에서 상대의 추격을 막아낼 힘</b>이 됩니다. 단, "타이어를 제일 덜 닳게 쓴다"는 아직 증명되지 않았어요(팀 관계자도 "괜찮은 수준"이라고만 말함).</div></div>
+    <div class="sf"><span class="ic">🏠</span><div><b>홈 관중의 힘과 부담</b> — 영국 드라이버 3명이 홈 응원을 받아요: 해밀턴(9승·폴 7회·스프린트 폴, 3번 출발), 러셀(4번), 노리스(2025년 우승자, 6번). 다만 <b>러셀은 "루이스·키미보다 느리다"</b>며 직선 0.3초 열세를 안고 있어 부담이 큽니다.</div></div>
+    <div class="sf"><span class="ic">🚨</span><div><b>실버스톤 세이프티카 복권</b> — 세이프티카가 나올 확률이 <b>약 80%로 시즌 4위</b>(1993년 이후로도 62%). 애비·코프스·매것츠-베켓츠에서 첫 바퀴 사고가 잦아요. 비 변수가 없어도, 세이프티카 뒤 <b>'먼저 타이어 갈아 앞서기'가 순위를 가장 크게 흔들</b> 수 있습니다(2~4위 뒤바뀔 위험).</div></div>
+    <div class="sf"><span class="ic">💥</span><div><b>메르세데스 배터리 고장 위험</b> — 안토넬리(스페인)·러셀(캐나다)이 앞자리를 달리다 <b>같은 배터리 고장으로 이미 리타이어</b>했어요. 원인은 아직 확정 안 됐고 신뢰성용 엔진으로 일부만 보완. 한 대당 8~12%, 둘 중 하나가 멈출 확률 15~25%로, 메르세데스 두 대 동반 포디움을 직접 위협합니다.</div></div>
+    <div class="sf"><span class="ic">⚡</span><div><b>배터리 방전과 고속코너의 차 궁합</b> — 2026년 엔진은 긴 직선에서 전기가 바닥나요. 그래서 <b>코프스·매것츠-베켓츠 고속코너가 '충전 구간'처럼</b> 변했습니다. 배터리를 잘 배분하는 메르세데스엔 유리하고, 순수 고속만 강한 레드불엔 불리해요(베르스타펜 스프린트 3위→6위). 페라리는 한 바퀴는 빠르나 레이스에선 배터리 약점이 있어요.</div></div>
+    <div class="sf"><span class="ic">🔴</span><div><b>스프린트 타이어·기세 이어가기</b> — 스프린트는 대부분 미디엄 타이어로 달려, 마른 노면 거동과 일요일 <b>'한 번만 교체'하는 전략</b> 방향을 미리 보여줬어요. 점수·기세 면에선 안토넬리가 선두 격차를 43점으로 벌렸습니다. 일요일 출발 순서는 별도 예선이라 그대로예요.</div></div>
+  </div>
+
+  <footer>
+    <b>어떻게 만들었나</b> — 8개 분야를 동시에 조사(출발 순서·스프린트/연습 속도·날씨·타이어·팀 최근 상태·팀 동향·역사 기록·신뢰성/순위)한 뒤, 결과를 가장 크게 좌우할 사실 4개는 <b>"틀렸다고 반박해 보는"</b> 방식으로 다시 검증했어요(출발 순서 <i>확인됨</i>, 메르세데스 속도 <i>일부 확인</i>, 배터리·세이프티카 위험 <i>일부 확인</i>, 날씨 <i>확인됨</i>). 그다음 시각이 다른 예측가 4명(데이터·전략/타이어·돌발변수·역사)의 예측을 합쳤습니다. 총 17명(+3D 코너 분석 1명). 세 경우의 확률 합 = 100% (정상 68 / 돌발 28 / 우천 4).
+    <br>출처: <a href="https://www.formula1.com/en/racing/2026/great-britain">Formula1.com</a>, The Race, Motorsport.com, Autosport, PlanetF1, GPFans, Crash.net, RacingNews365, Sky Sports, Pirelli, ESPN, Wikipedia (66개 자료 교차 확인).
+    <br><i>※ 이 예측은 확인된 사실을 바탕으로 한 확률적 판단이며, 실제 결과를 보장하지 않아요. 2026년 7월 5일 레이스 시작 전 기준.</i>
+  </footer>
+</div>
+
+<script>
+const TEAM = {
+  MER:{n:'Mercedes', c:'#27F4D2', t:'#06251f'},
+  FER:{n:'Ferrari',  c:'#FF2D2D', t:'#fff'},
+  RBR:{n:'Red Bull', c:'#3671C6', t:'#fff'},
+  MCL:{n:'McLaren',  c:'#FF8000', t:'#2a1500'},
+  RB:{n:'Racing Bulls', c:'#6692FF', t:'#06183a'},
+};
+const D = (drv,team)=>({drv,team});
+const SCENARIOS = [
+  { key:'dry', emoji:'☀️', name:'정상 (맑고 건조)', lk:68, color:'var(--gold)',
+    tag:'날씨가 확실히 맑아 차의 빠르기와 출발 순서가 결과를 좌우 → 안토넬리 우세',
+    p1:D('안토넬리','MER'), p2:D('해밀턴','FER'), p3:D('러셀','MER'),
+    dark:D('노리스','MCL'),
+    why:`5개 예보 모두 비 확률 0%, 기온 24–27°C로 <b>'맑고 건조'가 확실</b>해요. 그러면 순수하게 차의 빠르기와 출발 순서가 결과를 좌우합니다. 안토넬리는 <b>1번 출발(폴)에 스프린트 우승(2.7초 차, 8바퀴째 행어 직선에서 해밀턴 추월)</b>까지, 주말 내내 가장 좋은 신호를 다 가졌어요. 2026년 실버스톤의 핵심 문제는 <b>긴 직선을 달리다 배터리가 바닥나 속도가 뚝 떨어지는 것</b>인데, 메르세데스는 이 배터리 힘을 가장 잘 배분합니다. 도박 시장도 안토넬리 우승을 약 66%로 봅니다. <b>2위 해밀턴</b>은 스프린트 2위·스프린트 1번 출발로 페라리 중 가장 빠른 레이스 속도를 증명했고, 홈 관중까지 등에 업어 3번 출발이어도 앞의 르클레르를 넘을 힘이 충분해요(시장 2순위). <b>3위 러셀</b>은 가장 자신 없는 자리예요 — 시장은 그를 페라리 두 대 뒤 4순위로 보지만, 그는 스프린트에서 우승한 바로 그 차를 몰고 스프린트에선 르클레르를 앞섰으며, 4번 출발에서 해밀턴 한 대만 넘으면 됩니다. 반대로 르클레르는 2번에서 더 빠른 메르세데스를 막아야 해 순위를 뺏길 위험이 큽니다. 예측가 4명 중 3명이 해밀턴 2위에 동의했고, 3위는 러셀(데이터·역사)과 노리스(전략)로 갈렸어요.` },
+  { key:'chaos', emoji:'⚠️', name:'돌발 (사고·세이프티카)', lk:28, color:'#ff5d5d',
+    tag:'세이프티카 약 80% + 메르세데스 배터리 고장이 폴 차를 흔든다',
+    p1:D('르클레르','FER'), p2:D('해밀턴','FER'), p3:D('노리스','MCL'),
+    dark:D('로슨','RB'),
+    why:`날씨가 맑아 '비 변수'는 없지만, 실버스톤은 <b>세이프티카가 나올 확률이 약 80%로 시즌 4위</b>(1993년 이후로도 62%), 애비·코프스 코너에서 첫 바퀴 다중 추돌이 잦은 곳이에요. 여기에 <b>메르세데스의 배터리 고장 위험</b>이 겹칩니다 — 안토넬리(스페인, 2위 달리다)와 러셀(캐나다, 선두 달리다)이 이미 같은 고장으로 리타이어했어요. 팀 대표 볼프는 "원인을 아직 모른다", 기술책임자 앨리슨은 "위험 부분은 대체로 파악했다"고 해 완전히 고쳤다고 보긴 이릅니다(새 부품 단계 도입 중, 실버스톤엔 신뢰성용 엔진 장착). 한 대당 리타이어 확률 8~12%, 둘 중 하나가 멈출 확률은 15~25%예요. <b>1위 르클레르</b>는 불안한 폴 차(안토넬리) 바로 뒤 2번에서 출발하고, 페라리는 올 시즌 고장이 가장 적어 안토넬리가 멈추거나 첫 바퀴가 엉킬 때 <b>가장 먼저 이득</b>을 봅니다(도박 분석가도 그를 지목). <b>2위 해밀턴</b>은 실버스톤 혼돈에 강한 선수로(9승·폴 7회), 고장 적은 페라리로 3번 출발, 2008·2020처럼 변수 많은 레이스의 달인이에요. <b>3위 노리스</b>는 세이프티카가 나오면 메르세데스의 배터리 강점이 무의미해지고 맥라렌의 타이어·레이스 운영이 빛나는 전형적 수혜자입니다(6번 출발→스프린트 3위로 증명). 다크호스 <b>로슨</b>: 레이싱불스가 요즘 상승세(두 대 다 예선 상위권)라, 10번 출발에서 세이프티카 재출발과 앞차들의 소모가 겹치면 중위권을 시상대까지 밀어올릴 수 있어요.` },
+  { key:'wet', emoji:'🌧', name:'만약 비가 온다면', lk:4, color:'#5db4ff',
+    tag:'예보는 비 0% — 영국 날씨가 급변할 아주 작은 가능성만 반영',
+    p1:D('해밀턴','FER'), p2:D('베르스타펜','RBR'), p3:D('노리스','MCL'),
+    dark:D('안토넬리','MER'),
+    why:`모든 예보가 '비 안 옴'(0%, 많아야 7%)이라 이 경우는 어디까지나 <b>'만약에'이고 확률은 아주 낮아요</b>. 다만 실버스톤은 2024·2025년 연속으로 일요일에 비가 왔고, 서킷 측도 "영국 날씨는 급변한다"고 해 0으로 두진 않았습니다. 비가 오면 판이 완전히 뒤집혀요 — <b>메르세데스의 배터리 강점과 페라리의 직선 약점이 흐려지고</b>, 젖은 노면에서의 드라이버 실력과 타이어 관리가 승부를 가릅니다. <b>1위 해밀턴</b>은 2008년 빗속에서 4번 출발로 1분 이상 차이로 우승했던 실버스톤 빗길 최강자이고, 이번엔 3번 출발이에요. <b>2위 베르스타펜</b>도 빗길의 달인이라, 젖은 노면이 배터리 부담과 속도 저하를 덜어줘 7번 출발의 불리함을 만회할 수 있어요. <b>3위 노리스</b>는 2025년 영국 GP(비 영향) 우승자이고, 맥라렌의 타이어 관리가 젖은 노면에서 살아납니다. 다크호스 <b>안토넬리</b>: 비가 와도 여전히 가장 빠른 차를 탄 챔피언십 선두라 언제든 다시 치고 나올 수 있지만, 신인이라 빗길 변수와 배터리 위험이 겹쳐 윗자리가 흔들릴 수 있어요.` },
+];
+
+function chip(d){const t=TEAM[d.team];return `<div class="drv">${d.drv}</div><div class="team" style="color:${t.c}">${t.n}</div>`;}
+
+const tabsEl=document.getElementById('tabs');
+SCENARIOS.forEach((s,i)=>{
+  const el=document.createElement('div');el.className='tab'+(i===0?' on':'');el.dataset.i=i;
+  el.innerHTML=`<div class="nm">${s.emoji} ${s.name}</div>
+    <div class="lk">일어날 확률 ≈ ${s.lk}%</div>
+    <div class="bar"><i style="width:${s.lk}%;background:${s.key==='chaos'?'linear-gradient(90deg,#ff5d5d,#ffae3d)':s.key==='wet'?'linear-gradient(90deg,#5db4ff,#7ad4ff)':'linear-gradient(90deg,var(--gold),#ff8a3d)'}"></div></div>`;
+  el.onclick=()=>render(i);
+  tabsEl.appendChild(el);
+});
+
+function render(i){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',+t.dataset.i===i));
+  const s=SCENARIOS[i];
+  const t1=TEAM[s.p1.team],t2=TEAM[s.p2.team],t3=TEAM[s.p3.team],td=TEAM[s.dark.team];
+  document.getElementById('panel').innerHTML=`
+    <div class="ph"><h2>${s.emoji} ${s.name} <span style="color:var(--muted);font-weight:600">· ≈${s.lk}%</span></h2>
+      <div class="tag">${s.tag}</div></div>
+    <div class="podium">
+      <div class="step s2" style="background:linear-gradient(180deg,${t2.c}cc,${t2.c}77);color:${t2.t}">
+        <div class="pos">2</div>${chip(s.p2)}</div>
+      <div class="step s1" style="background:linear-gradient(180deg,${t1.c},${t1.c}aa);color:${t1.t}">
+        <div class="crown">👑</div><div class="pos">1</div>${chip(s.p1)}</div>
+      <div class="step s3" style="background:linear-gradient(180deg,${t3.c}cc,${t3.c}66);color:${t3.t}">
+        <div class="pos">3</div>${chip(s.p3)}</div>
+    </div>
+    <div class="dark">🐎 <b>다크호스(뜻밖의 변수)</b> — ${s.dark.drv} <span style="color:${td.c};font-weight:700">(${td.n})</span></div>
+    <div class="why">${s.why}</div>`;
+}
+render(0);
+</script>
+</body>
+</html>

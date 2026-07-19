@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2026 오스트리아 GP · 포디움 예측 대시보드</title>
+<style>
+  :root{
+    --mer:#27F4D2; --fer:#FF2D2D; --rbr:#3671C6; --mcl:#FF8000; --rb:#6692FF;
+    --bg:#0a0e14; --card:#11161f; --card2:#161d28; --line:#222c3a;
+    --txt:#e6edf3; --muted:#8b97a7; --gold:#FFD23F;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:
+      radial-gradient(1200px 600px at 80% -10%, #16314a55, transparent),
+      radial-gradient(900px 500px at 0% 0%, #2a103a44, transparent),
+      var(--bg);
+    color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo",Roboto,sans-serif;
+    line-height:1.5;min-height:100vh;padding:28px 20px 60px}
+  .wrap{max-width:1080px;margin:0 auto}
+  header.top{margin-bottom:22px}
+  .kik{color:var(--gold);font-weight:800;font-size:12px;letter-spacing:2px;text-transform:uppercase}
+  h1{font-size:30px;letter-spacing:-.5px;margin:6px 0 8px}
+  .meta{color:var(--muted);font-size:13px}
+  .meta b{color:var(--txt)}
+  /* fact strip */
+  .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0}
+  .fact{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .fact h4{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .fact .big{font-size:15px;font-weight:700;margin-bottom:4px}
+  .fact .sub{font-size:12px;color:var(--muted);line-height:1.5}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;margin:2px 3px 0 0}
+  /* tabs */
+  .tabs{display:flex;gap:8px;margin:26px 0 6px;flex-wrap:wrap}
+  .tab{flex:1;min-width:160px;background:var(--card);border:1px solid var(--line);border-radius:13px;
+    padding:13px 15px;cursor:pointer;transition:.15s;text-align:left}
+  .tab:hover{border-color:#3a4658}
+  .tab.on{border-color:var(--gold);background:linear-gradient(180deg,#1c1a10,var(--card))}
+  .tab .nm{font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px}
+  .tab .lk{color:var(--muted);font-size:12px;margin-top:6px}
+  .bar{height:6px;border-radius:4px;background:#243; margin-top:7px;overflow:hidden;background:#1b2433}
+  .bar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gold),#ff8a3d)}
+  /* podium panel */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;margin-top:14px}
+  .ph{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+  .ph h2{font-size:20px}
+  .ph .tag{font-size:13px;color:var(--muted)}
+  .podium{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:14px;align-items:end;max-width:680px;margin:0 auto 8px}
+  .step{border-radius:14px 14px 0 0;padding:16px 12px;text-align:center;position:relative;border:1px solid #ffffff14;border-bottom:none}
+  .step .pos{font-size:30px;font-weight:900;opacity:.35;line-height:1}
+  .step .drv{font-size:18px;font-weight:800;margin-top:8px}
+  .step .team{font-size:12px;font-weight:700;margin-top:3px;opacity:.95}
+  .step .gap{font-size:11px;color:#0008;margin-top:4px;font-weight:700}
+  .s1{min-height:180px} .s2{min-height:140px} .s3{min-height:118px}
+  .crown{position:absolute;top:-26px;left:50%;transform:translateX(-50%);font-size:22px}
+  .dark{margin:14px auto 0;max-width:680px;background:var(--card2);border:1px dashed var(--line);
+    border-radius:12px;padding:10px 14px;font-size:13px}
+  .dark b{color:var(--gold)}
+  .why{margin-top:16px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:15px 17px;
+    font-size:13.5px;line-height:1.7;color:#cdd6e0}
+  /* swing factors */
+  .swing{margin-top:26px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+  .swing h3{font-size:16px;margin-bottom:12px}
+  .sf{display:flex;gap:11px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.6}
+  .sf:last-child{border:none}
+  .sf .ic{font-size:16px;flex-shrink:0}
+  .sf b{color:#fff}
+  footer{margin-top:26px;color:var(--muted);font-size:11.5px;line-height:1.7;border-top:1px solid var(--line);padding-top:16px}
+  .grid-list{font-size:12.5px;color:#cdd6e0;line-height:1.9}
+  .gnum{display:inline-block;width:20px;color:var(--muted);font-weight:700}
+  @media(max-width:720px){.facts{grid-template-columns:1fr}.podium{max-width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="kik">🏁 Formula 1 · Round 8 / 22 · Red Bull Ring</div>
+    <h1>2026 오스트리아 GP — 포디움 예측</h1>
+    <div class="meta">결승 <b>6월 28일(일) 15:00</b> 현지 · 71랩 · <b>17개 AI 에이전트</b>가 그리드·연습페이스·날씨·타이어·신뢰성·역사를 수집하고 <b>핵심 사실을 적대적 교차검증</b>한 결과 · 시나리오 3종</div>
+  </header>
+
+  <!-- VERIFIED FACTS -->
+  <div class="facts">
+    <div class="fact">
+      <h4>✅ 확정 그리드 (페널티 없음)</h4>
+      <div class="grid-list">
+        <span class="gnum">P1</span><b style="color:var(--mer)">러셀</b> · 폴 1:06.113<br>
+        <span class="gnum">P2</span><span style="color:var(--fer)">르클레르</span> +0.236<br>
+        <span class="gnum">P3</span><span style="color:var(--fer)">해밀턴</span> +0.295<br>
+        <span class="gnum">P4</span><span style="color:var(--mer)">안토넬리</span> +0.301<br>
+        <span class="gnum">P5</span><span style="color:var(--rbr)">베르스타펜</span> +0.362 <span style="color:var(--muted)">(Q3 충돌·밤샘 리빌드, 무페널티)</span><br>
+        <span class="gnum">P6</span><span style="color:var(--mcl)">노리스</span> · <span class="gnum">P7</span><span style="color:var(--mcl)">피아스트리</span>
+      </div>
+    </div>
+    <div class="fact">
+      <h4>☀️ 레이스 날씨</h4>
+      <div class="big">건조 · 폭염</div>
+      <div class="sub">강수확률 ≈ <b style="color:var(--txt)">0%</b> · 기온 32–34°C<br>노면 <b style="color:#ff8a3d">~53°C</b> · 약풍 (유럽 폭염)<br>→ 후륜 <b>열(thermal) 열화</b> 중심, 2~3스톱</div>
+    </div>
+    <div class="fact">
+      <h4>⏱ 실제 레이스 페이스 (보정 롱런)</h4>
+      <div class="sub">
+        1. <b style="color:var(--mer)">안토넬리</b> 최速<br>
+        2. <b style="color:var(--mer)">러셀</b> +0.06 · <b style="color:var(--mer)">메르세데스 최저열화 ~0.10/랩</b><br>
+        3. <span style="color:var(--mcl)">노리스</span>+0.21 ≈ <span style="color:var(--rbr)">베르스타펜</span>+0.27 (맥라렌 열화 ~0.30/랩 약점)<br>
+        4. <span style="color:var(--fer)">해밀턴</span>+0.51 <span style="color:var(--muted)">*페라리 금요일 PU 샌드백 정황 → 실제 더 빠를 듯</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENARIO TABS -->
+  <div class="tabs" id="tabs"></div>
+  <div class="panel" id="panel"></div>
+
+  <!-- SWING FACTORS -->
+  <div class="swing">
+    <h3>🎚 결과를 가르는 교차 변수 (cross-cutting)</h3>
+    <div class="sf"><span class="ic">🔋</span><div><b>메르세데스 배터리 모듈 결함</b> — 시즌 최대 변수. 캐나다(러셀 선두 중)·바르셀로나(안토넬리 잔여 3랩 P2)서 리타이어 유발. 메르세데스 1-2를 깨뜨릴 <b>가장 유력한 'key DNF'</b> → 카오스 시나리오 가중치를 끌어올림.</div></div>
+    <div class="sf"><span class="ic">🔧</span><div><b>베르스타펜 RB22 밤샘 리빌드 완료</b> — 기어박스·서스펜션·윙·플로어·ECU 교체, Art. B3.5.4 준수로 <b>페널티 없이 P5 출발</b>. 단 레드불은 후미 불안정 근본원인 비공개.</div></div>
+    <div class="sf"><span class="ic">🐎</span><div><b>페라리 금요일 PU 샌드백</b> — GPS/직선속도 데이터상 신형 V6 출력을 낮춰 달린 정황. 실제 레이스 페이스(특히 해밀턴)는 롱런 수치보다 빠를 가능성 → 두 포디움 예측 모두에서 페라리가 표면 4위 페이스를 상회.</div></div>
+    <div class="sf"><span class="ic">🌡</span><div><b>폭염(노면 ~53°C)</b> = 메타 변수. 메르세데스의 저열화 강점과 맥라렌의 고열화 약점을 <b>동시에 증폭</b>.</div></div>
+    <div class="sf"><span class="ic">💥</span><div><b>레드불링 카오스 시그니처</b> — 최근 표본 SC ~50%, VSC ~40%, 역대 DNF ~40%, 레이스당 추월 ~81회, T3 오르막 제동 1랩 충돌 빈발. 짧은 65초 랩이라 트랙 포지션이 유동적.</div></div>
+  </div>
+
+  <footer>
+    <b>방법론</b> — 8개 차원 병렬 리서치(그리드·연습 롱런·날씨·타이어·차량폼·팀동향·역사통계·신뢰성/챔피언십) → 결과 좌우 사실 4종 독립 교차검증 → 관점이 다른 4개 예측가 패널(데이터·전략/타이어·카오스·역사) → 합성. 총 17 에이전트.
+    확률은 상호배타 3구간 합 ≈100% (정상 60 / 카오스 37 / 우천 3). 출처: Formula1.com, The Race, Motorsport.com, Autosport, GPFans, Crash.net, Total-Motorsport, Wikipedia.
+    <br><i>※ 예측은 검증된 사실에 근거한 확률적 판단이며 실제 결과를 보장하지 않음.</i>
+  </footer>
+</div>
+
+<script>
+const TEAM = {
+  MER:{n:'Mercedes', c:'#27F4D2', t:'#06251f'},
+  FER:{n:'Ferrari',  c:'#FF2D2D', t:'#fff'},
+  RBR:{n:'Red Bull Racing', c:'#3671C6', t:'#fff'},
+  MCL:{n:'McLaren',  c:'#FF8000', t:'#2a1500'},
+  RB:{n:'Racing Bulls', c:'#6692FF', t:'#06183a'},
+};
+const D = (drv,team)=>({drv,team});
+const SCENARIOS = [
+  { key:'dry', emoji:'☀️', name:'정상 (건조)', lk:60, color:'var(--gold)',
+    tag:'확정 예보·압도적 페이스 데이터 기반 베이스 케이스',
+    p1:D('러셀','MER'), p2:D('안토넬리','MER'), p3:D('해밀턴','FER'),
+    dark:D('노리스','MCL'),
+    why:`확정된 건조·폭염(노면 ~53°C)·2~3스톱의 정통 시나리오. <b>러셀</b>이 폴(1:06.113)+클린에어를 쥐었고, 메르세데스는 한 바퀴·롱런 모두 최速이면서 <b>그리드 최저 타이어 열화(~0.10s/랩)</b>까지 갖춰 열화가 승부를 가르는 더위에 최적(현대 레드불링 폴→우승 ~57%). <b>안토넬리</b>는 롱런이 ~0.06s/랩 더 빠르지만 3그리드 차이+클린에어로 상쇄돼 P2이자 우승 위협. P3는 <b>해밀턴</b>: P3 출발+페라리 최고 레이스페이스+신형 V6+금요일 PU 샌드백 정황으로 표면 페이스(+0.51s)보다 빠름. 맥라렌은 ~0.30s/랩 열화로 발목, 베르스타펜(P5·리빌드카·후미 불안정)은 트래픽 돌파 과제. 다크호스 <b>노리스</b>: 더위가 덜하면 언더컷으로 포디움 가능.` },
+  { key:'chaos', emoji:'💥', name:'카오스 (사고·SC)', lk:37, color:'#ff5d5d',
+    tag:'레드불링 고변동성 + 메르세데스 배터리 결함이 가중',
+    p1:D('베르스타펜','RBR'), p2:D('르클레르','FER'), p3:D('해밀턴','FER'),
+    dark:D('로슨','RB'),
+    why:`레드불링은 카오스 빈발 트랙(SC ~50%, VSC ~40%, DNF ~40%, 추월 ~81회, T3 1랩 충돌 多). 여기에 <b>메르세데스 배터리 모듈 결함</b>이 시즌 최대 리셔플 요인 → 선두 메르세데스 DNF가 가장 유력한 변수라 이 시나리오 비중이 큼(~37%). SC는 <b>베르스타펜</b>에게 사실상 공짜 피트+재출발을 주고, 그는 best non-Merc 페이스+P5(역배치라 이득 최대)+홈+무페널티 리빌드카로 P1. 프론트로의 <b>르클레르</b>가 최고의 '어부지리' 상속자로 P2, <b>해밀턴</b> P3(패널 4개 중 3개 카드에 포디움). 다크호스 <b>로슨</b>: 레이싱불스 두 대 Q3 진출+브레이크 문제 해결+works PU 잔고장 회피 → 높은 리타이어율+SC 압축 시 미드필드 점프업.` },
+  { key:'wet', emoji:'🌧', name:'우천 (반사실)', lk:3, color:'#5db4ff',
+    tag:'예보상 강수 ~0% — 고변동 반사실 가정',
+    p1:D('베르스타펜','RBR'), p2:D('러셀','MER'), p3:D('해밀턴','FER'),
+    dark:D('노리스','MCL'),
+    why:`레이스데이 예보가 강수확률 ~0%라 가능성 ~3%의 반사실적 가정. 비가 오면 <b>메르세데스 열화 우위</b>와 <b>레드불 건조 페이스 열세</b>를 모두 무효화 → 드라이버 우천 기량 싸움으로 리셋. 세대 최고의 우천 오퍼레이터 <b>베르스타펜</b>이 P5에서 P1, 슬릭/인터/웻 전환 콜이 결정타. 폴의 <b>러셀</b>은 스프레이로 추월이 어려워 트랙포지션 유지 P2, <b>해밀턴</b>이 우천 기량으로 P3. 안토넬리는 우천 경험 부족으로 포디움 이탈. 다크호스 <b>노리스</b>: 차가운 젖은 노면이 맥라렌의 치명적 열화 약점을 제거해 P6에서 약진. 우천은 T3 제동구간 SC 확률도 급등.` },
+];
+
+function chip(d){const t=TEAM[d.team];return `<div class="drv">${d.drv}</div><div class="team" style="color:${t.c}">${t.n}</div>`;}
+
+const tabsEl=document.getElementById('tabs');
+SCENARIOS.forEach((s,i)=>{
+  const el=document.createElement('div');el.className='tab'+(i===0?' on':'');el.dataset.i=i;
+  el.innerHTML=`<div class="nm">${s.emoji} ${s.name}</div>
+    <div class="lk">발생 확률 ≈ ${s.lk}%</div>
+    <div class="bar"><i style="width:${s.lk}%;background:${s.key==='chaos'?'linear-gradient(90deg,#ff5d5d,#ffae3d)':s.key==='wet'?'linear-gradient(90deg,#5db4ff,#7ad4ff)':'linear-gradient(90deg,var(--gold),#ff8a3d)'}"></div></div>`;
+  el.onclick=()=>render(i);
+  tabsEl.appendChild(el);
+});
+
+function render(i){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',+t.dataset.i===i));
+  const s=SCENARIOS[i];
+  const t1=TEAM[s.p1.team],t2=TEAM[s.p2.team],t3=TEAM[s.p3.team],td=TEAM[s.dark.team];
+  document.getElementById('panel').innerHTML=`
+    <div class="ph"><h2>${s.emoji} ${s.name} <span style="color:var(--muted);font-weight:600">· ≈${s.lk}%</span></h2>
+      <div class="tag">${s.tag}</div></div>
+    <div class="podium">
+      <div class="step s2" style="background:linear-gradient(180deg,${t2.c}cc,${t2.c}77);color:${t2.t}">
+        <div class="pos">2</div>${chip(s.p2)}</div>
+      <div class="step s1" style="background:linear-gradient(180deg,${t1.c},${t1.c}aa);color:${t1.t}">
+        <div class="crown">👑</div><div class="pos">1</div>${chip(s.p1)}</div>
+      <div class="step s3" style="background:linear-gradient(180deg,${t3.c}cc,${t3.c}66);color:${t3.t}">
+        <div class="pos">3</div>${chip(s.p3)}</div>
+    </div>
+    <div class="dark">🐎 <b>다크호스</b> — ${s.dark.drv} <span style="color:${td.c};font-weight:700">(${td.n})</span></div>
+    <div class="why">${s.why}</div>`;
+}
+render(0);
+</script>
+</body>
+</html>

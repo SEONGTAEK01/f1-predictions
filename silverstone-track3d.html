@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>실버스톤 3D · 코너별 최강 차 (2026 영국 GP)</title>
+<style>
+  :root{
+    --mer:#27F4D2; --fer:#FF2D2D; --rbr:#3671C6; --mcl:#FF8000;
+    --bg:#0a0e14; --panel:#11161f; --panel2:#161d28; --line:#222c3a;
+    --txt:#e6edf3; --muted:#8b97a7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo",Roboto,sans-serif;
+    overflow:hidden}
+  #app{display:flex;height:100vh;width:100vw}
+  /* ---- side panel ---- */
+  #side{width:370px;min-width:370px;height:100%;background:var(--panel);
+    border-right:1px solid var(--line);display:flex;flex-direction:column}
+  #side header{padding:18px 20px 14px;border-bottom:1px solid var(--line)}
+  #side header h1{font-size:18px;letter-spacing:-.3px;line-height:1.25}
+  #side header .sub{color:var(--muted);font-size:12px;margin-top:6px;line-height:1.5}
+  .legend{display:flex;gap:8px;padding:12px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .lg{display:flex;align-items:center;gap:7px;background:var(--panel2);
+    padding:6px 10px;border-radius:20px;font-size:12px;font-weight:600}
+  .dot{width:12px;height:12px;border-radius:50%}
+  .list{overflow-y:auto;flex:1;padding:8px 12px 80px}
+  .zone{display:flex;gap:12px;padding:11px 12px;border-radius:11px;cursor:pointer;
+    border:1px solid transparent;transition:.15s;align-items:flex-start}
+  .zone:hover{background:var(--panel2)}
+  .zone.active{background:var(--panel2);border-color:var(--line)}
+  .zbar{width:5px;border-radius:4px;align-self:stretch;min-height:38px}
+  .zhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .ztag{font-weight:800;font-size:14px}
+  .zname{color:var(--muted);font-size:12px}
+  .badge{font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;color:#03121a}
+  .zwhy{color:#b9c4d2;font-size:12px;line-height:1.6;margin-top:5px;display:none}
+  .zone.active .zwhy{display:block}
+  .controls{padding:12px 20px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap;background:var(--panel)}
+  .btn{background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+    font-size:12px;font-weight:600;padding:8px 12px;border-radius:9px;cursor:pointer}
+  .btn:hover{border-color:#3a4658}
+  .btn.on{background:#1f6feb22;border-color:#1f6feb;color:#7db3ff}
+  .foot{padding:10px 20px;border-top:1px solid var(--line);color:var(--muted);font-size:10.5px;line-height:1.55}
+  /* ---- canvas ---- */
+  #scene{flex:1;position:relative}
+  #c{display:block;width:100%;height:100%}
+  #labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .lab{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;cursor:pointer;
+    font-size:11px;font-weight:800;color:#03121a;padding:3px 8px;border-radius:8px;white-space:nowrap;
+    box-shadow:0 2px 8px #0008;border:1.5px solid #ffffff55;transition:transform .12s}
+  .lab:hover{transform:translate(-50%,-50%) scale(1.12)}
+  .hint{position:absolute;left:14px;bottom:12px;color:var(--muted);font-size:11px;
+    background:#0a0e14aa;padding:6px 10px;border-radius:8px;border:1px solid var(--line);backdrop-filter:blur(4px)}
+  .tt{position:absolute;top:14px;right:14px;background:#0a0e14cc;border:1px solid var(--line);
+    border-radius:12px;padding:14px 16px;width:280px;backdrop-filter:blur(6px);display:none}
+  .tt.show{display:block}
+  .tt h3{font-size:15px;margin-bottom:4px}
+  .tt .nm{color:var(--muted);font-size:12px;margin-bottom:8px}
+  .tt .car{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:13px;margin-bottom:8px}
+  .tt p{font-size:12.5px;line-height:1.65;color:#cdd6e0}
+  .tt .en{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
+  @media(max-width:760px){#side{width:310px;min-width:310px}}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="side">
+    <header>
+      <h1>🏁 실버스톤 3D · 코너별 최강 차</h1>
+      <div class="sub">2026 영국 GP · Silverstone · 18코너 / 높낮이 ≈15m (거의 평탄) · 5.891km<br>각 구간에 <b>2026 시즌 성적 기준</b> 가장 강한 차 · <b style="color:var(--muted)">2026 핵심: 긴 직선 끝에서 배터리가 바닥나는 문제</b></div>
+    </header>
+    <div class="legend" id="legend"></div>
+    <div class="list" id="list"></div>
+    <div class="controls">
+      <button class="btn" id="bRotate">⟳ 자동회전</button>
+      <button class="btn on" id="bLabels">🏷 코너라벨</button>
+      <button class="btn" id="bExag">⛰ 높낮이 강조</button>
+      <button class="btn" id="bReset">⊙ 시점초기화</button>
+    </div>
+    <div class="foot">
+      ※ 트랙 모양·높낮이는 실제 배치를 참고한 <b>간략(스타일라이즈드) 3D</b>예요(실버스톤은 거의 평탄).
+      코너별로 강한 차는 2026 시즌 실제 성적(메르세데스=배터리 배분·직선, 레드불=순수 고속, 페라리=브레이크·느린 코너, 맥라렌=중간 속도)을 근거로 했어요.
+      2026년엔 고속 S자가 '충전 구간'이 되면서 고속차의 장점이 많이 줄었습니다. 출처: Formula1.com, Motorsport.com, Crash.net, The Race, Total-Motorsport, Wikipedia.
+    </div>
+  </aside>
+  <div id="scene">
+    <canvas id="c"></canvas>
+    <div id="labels"></div>
+    <div class="hint">드래그=회전 · 휠=줌 · 우클릭드래그=이동 · 코너 클릭=상세</div>
+    <div class="tt" id="tt"></div>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ================= DATA ================= */
+const TEAMS = {
+  MER:{ name:'Mercedes', who:'안토넬리 · 러셀', color:'#27F4D2' },
+  FER:{ name:'Ferrari',  who:'르클레르 · 해밀턴', color:'#FF2D2D' },
+  RBR:{ name:'Red Bull', who:'베르스타펜 · 하자르', color:'#3671C6' },
+  MCL:{ name:'McLaren',  who:'노리스 · 피아스트리', color:'#FF8000' },
+};
+// zones in driving order; best = which 2026 car is strongest here
+const ZONES = [
+  { tag:'출발 직선', name:'해밀턴 직선 · 출발선, 한 바퀴 시작 때 배터리 가득', best:'MER',
+    why:'2026 메르세데스 차의 최대 강점은 직선에서 배터리 힘을 잘 배분하는 것과 직선 속도예요. 안토넬리가 스프린트에서 이 힘을 몰아 써(부스트) 앞차를 눌렀고, 1번 출발(폴)도 여기서 나왔죠. 출발선과 직선 구간은 메르세데스의 앞마당입니다.',
+    en:'Mercedes’ deployment / straight-line edge and hidden "engine trick" make the launch and S/F straight its home turf.' },
+  { tag:'T1', name:'Abbey(1번) · 아주 빠른 우코너 (초반 배터리 가득 ~250+km/h)', best:'RBR',
+    why:'애비는 아주 빠른 코너인데 한 바퀴의 초반이라 배터리가 가득 차 있어요. 그래서 2026년 에너지 제한이 가장 덜 걸리는 곳이죠. 고속 코너에 강한 레드불의 장점이 살아나는 몇 안 되는 구간입니다. 다만 배터리 방전 문제로 예전만큼 큰 우위는 아니에요.',
+    en:'A flat-out opener with full battery, Abbey is one of the few spots Red Bull’s high-speed aero still shines before energy limits bite.' },
+  { tag:'T2–T4', name:'Farm→Village→더 루프 · 가장 느린 헤어핀+강한 브레이크', best:'FER',
+    why:'빌리지로 들어갈 때의 강한 브레이크와, 트랙에서 가장 느린 코너(더 루프)를 빠져나올 때의 접지력이 승부처예요. 페라리는 이번 주말 해밀턴이 스프린트 1번 출발로 보여준 것처럼 한 바퀴 속도·브레이크·느린 코너 탈출이 강점입니다. 느리고 세게 밟는 조합은 페라리의 영역이에요.',
+    en:'Heavy braking into Village and traction out of the slowest corner (The Loop) suit Ferrari’s braking and low-speed traction.' },
+  { tag:'T5', name:'Aintree(5번) · 중간 속도 좌코너 → 웰링턴 직선', best:'MCL',
+    why:'에인트리는 전형적인 중간 속도 코너예요. 맥라렌은 중간 속도 코너의 균형이 좋아, 노리스가 스프린트 3위를 건진 것도 이런 구간 덕이죠. 다만 실버스톤에선 맥라렌이 누르는 힘(다운포스)이 부족해 차이는 크지 않아요.',
+    en:'Medium-speed Aintree rewards McLaren’s mid-corner aero balance, though its Silverstone low-downforce woes cap the margin.' },
+  { tag:'웰링턴 직선', name:'Wellington Straight · 긴 추월용 직선', best:'MER',
+    why:'긴 직선에서의 배터리 배분과 직선 속도가 핵심이에요. 메르세데스가 여기서 앞서고, 러셀조차 "직선이 0.3초 느리다"고 할 만큼 이 차의 직선이 기준이 됩니다. 추월이 자주 나오는 이 직선에서 메르세데스가 유리해요.',
+    en:'A long DRS drag strip where Mercedes’ deployment and top-speed advantage make it the benchmark.' },
+  { tag:'T6–T7', name:'Brooklands+Luffield · 길고 느린 코너 탈출', best:'FER',
+    why:'브루클랜즈의 브레이크와, 길고 느린 러필드를 빠져나올 때의 접지력이 중요해요. 페라리의 브레이크·느린 코너 탈출 강점에 딱 맞는 조합이죠. 러셀이 예선에서 러필드에서 미끄러져 모래밭으로 나간 것도 이 구간이 까다롭다는 증거예요.',
+    en:'Braking into Brooklands and long slow-corner traction out of Luffield play to Ferrari’s braking / low-speed strengths.' },
+  { tag:'T8', name:'Woodcote(8번) · 중간~빠른 우코너 → 내셔널 직선', best:'MCL',
+    why:'우드코트는 중간~빠른 코너라 차의 안정감이 중요해요. 맥라렌의 중간 속도 강점이 살아나는 곳이고, 이어지는 내셔널 직선으로 나갈 때의 접지력까지 좌우합니다.',
+    en:'The medium-fast Woodcote sweep rewards McLaren’s mid-speed aero platform before the National straight.' },
+  { tag:'T9', name:'Copse(9번) · 트랙 최고속 우코너(~290km/h)', best:'RBR',
+    why:'코프스는 트랙에서 가장 빠른 코너로, 순수한 차의 안정감이 지배해요. 원래 레드불의 강점 구간이죠. 다만 2026년엔 에너지 제한으로 예년보다 ~20km/h 느려졌고, 안토넬리의 정교한 고속 주행이 차이를 거의 지워 우위가 아슬아슬해요.',
+    en:'Silverstone’s flat-out signature corner is Red Bull’s classic aero domain, but 2026 energy limits and Antonelli’s precision nearly erase the edge.' },
+  { tag:'T10–T13', name:'Maggotts-Becketts-Chapel · 고속 S자 (2026 충전 구간)', best:'MER',
+    why:'원래 이 고속 S자 구간은 레드불의 영역이지만, 2026년 실버스톤에선 이곳이 "충전 구간"으로 바뀌었어요. 드라이버들이 코너 속도를 조금 희생해 다음 직선용 배터리를 채우거든요. 즉 순수 속도가 아니라 배터리 배분과 타이어 아끼기가 기록을 좌우해요 → 메르세데스가 가장 잘합니다(안토넬리가 이번 주말 최속).',
+    en:'The famed esses become 2026’s battery "charging station", so energy harvest and low-deg management — Mercedes’ forte — decide it, not raw aero.' },
+  { tag:'행어 직선', name:'Hangar Straight · 가장 긴 직선·추월 무대', best:'MER',
+    why:'행어는 트랙에서 가장 빠른 직선이자 추월 무대예요. 스프린트에서 안토넬리가 바로 여기서 배터리 힘을 몰아 써 해밀턴을 추월해 우승했죠. 직선 속도와 배터리 배분이 정확히 메르세데스의 결정적 무기예요.',
+    en:'The longest straight and the exact spot Antonelli’s Boost passed Hamilton for the sprint win — pure Mercedes deployment territory.' },
+  { tag:'T14', name:'Stowe(14번) · 브레이크 후 중간~빠른 우코너', best:'MCL',
+    why:'스토우는 행어 최고속에서 브레이크를 밟고 중간~빠른 속도로 도는 코너예요. 2026년엔 누르는 힘 부족으로 "훨씬 느려져" 중간 속도 성격이 커졌죠. 이 구간을 맥라렌이 잘 처리해요. 실제로 스프린트 추월(러셀→노리스, 안토넬리→해밀턴)이 나온 지점이기도 해요.',
+    en:'Now a slower medium-speed corner (downforce-limited), Stowe suits McLaren’s mid-speed aero — and it’s a proven overtaking spot.' },
+  { tag:'T15–T17', name:'Vale+Club · 한 바퀴 최강 브레이크 + 느린 코너 탈출', best:'FER',
+    why:'베일은 한 바퀴에서 가장 세게 브레이크를 밟는 곳이고, 클럽은 느린 코너를 빠져나가는 구간이에요. 페라리의 브레이크 안정감과 느린 코너 접지력에 딱 맞는 마지막 승부처죠. 여기서 잘 빠져나가면 곧바로 출발선 직선 속도로 이어져요.',
+    en:'The lap’s heaviest braking (Vale) plus low-speed traction out of Club fit Ferrari’s braking-and-traction profile, feeding the S/F straight.' },
+];
+// centerline waypoints (stylized Silverstone layout). x,z = top-down, e = elevation (nearly flat). zone index per node.
+const NODES = [
+  {x:60,  z:30,  e:3, z_:0, c:'S/F'},
+  {x:110, z:28,  e:3, z_:0},
+  {x:155, z:30,  e:2, z_:0},
+  {x:185, z:42,  e:2, z_:1, c:'T1'},
+  {x:198, z:68,  e:3, z_:2, c:'T2'},
+  {x:200, z:95,  e:5, z_:2, c:'T3'},
+  {x:186, z:112, e:6, z_:2, c:'T4'},
+  {x:165, z:108, e:5, z_:3, c:'T5'},
+  {x:128, z:100, e:4, z_:4},
+  {x:95,  z:104, e:4, z_:5, c:'T6'},
+  {x:82,  z:122, e:4, z_:5, c:'T7'},
+  {x:98,  z:138, e:3, z_:6},
+  {x:122, z:142, e:3, z_:6, c:'T8'},
+  {x:135, z:165, e:4, z_:6},
+  {x:150, z:188, e:5, z_:7, c:'T9'},
+  {x:128, z:196, e:5, z_:8, c:'T10'},
+  {x:105, z:188, e:4, z_:8, c:'T11'},
+  {x:88,  z:200, e:4, z_:8},
+  {x:70,  z:192, e:4, z_:8, c:'T13'},
+  {x:52,  z:160, e:3, z_:9},
+  {x:42,  z:128, e:2, z_:9},
+  {x:40,  z:100, e:2, z_:10, c:'T14'},
+  {x:48,  z:78,  e:3, z_:11, c:'T15'},
+  {x:40,  z:55,  e:3, z_:11, c:'T16'},
+  {x:30,  z:35,  e:3, z_:11},
+];
+
+/* ================= SETUP ================= */
+const canvas = document.getElementById('c');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#0a0e14');
+scene.fog = new THREE.Fog('#0a0e14', 380, 820);
+
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+
+const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 3000);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.maxPolarAngle = Math.PI*0.49;
+
+scene.add(new THREE.HemisphereLight('#bcd3ff','#0a0e14', 1.1));
+const dir = new THREE.DirectionalLight('#ffffff', 1.6);
+dir.position.set(120,260,80); scene.add(dir);
+
+/* center the layout */
+let cx=0,cz=0; NODES.forEach(n=>{cx+=n.x;cz+=n.z}); cx/=NODES.length; cz/=NODES.length;
+let EXAG = 2.2;
+function nodeVec(n){ return new THREE.Vector3(n.x-cx, n.e*EXAG, n.z-cz); }
+
+const trackGroup = new THREE.Group();
+scene.add(trackGroup);
+
+const colMER=new THREE.Color(TEAMS.MER.color), colFER=new THREE.Color(TEAMS.FER.color),
+      colRBR=new THREE.Color(TEAMS.RBR.color), colMCL=new THREE.Color(TEAMS.MCL.color);
+function zoneColor(zi){ const b=ZONES[zi].best; return b==='MER'?colMER:b==='FER'?colFER:b==='RBR'?colRBR:colMCL; }
+
+let curve, samples, sampleZone, ribbonMesh, curtainMesh, highlightMesh;
+
+function buildTrack(){
+  // clear
+  while(trackGroup.children.length) trackGroup.remove(trackGroup.children[0]);
+  const pts = NODES.map(nodeVec);
+  curve = new THREE.CatmullRomCurve3(pts, true, 'centripetal');
+  const N = 900;
+  samples = curve.getSpacedPoints(N);
+  // assign each sample a zone via nearest node
+  const nodePos = pts;
+  sampleZone = samples.map(s=>{
+    let bi=0,bd=1e9;
+    for(let i=0;i<nodePos.length;i++){const d=s.distanceToSquared(nodePos[i]); if(d<bd){bd=d;bi=i;}}
+    return NODES[bi].z_;
+  });
+
+  const hw = 4.4;            // half track width
+  const up = new THREE.Vector3(0,1,0);
+  const pos=[], col=[], idx=[];
+  const cpos=[], ccol=[];    // curtain (centerline -> base)
+  const baseY = -2;
+  const tmpDir=new THREE.Vector3(), right=new THREE.Vector3();
+  for(let i=0;i<=N;i++){
+    const p=samples[i], pn=samples[(i+1)%(N+1)];
+    tmpDir.subVectors(pn,p).normalize();
+    right.crossVectors(tmpDir,up).normalize().multiplyScalar(hw);
+    pos.push(p.x-right.x, p.y, p.z-right.z);
+    pos.push(p.x+right.x, p.y, p.z+right.z);
+    const c=zoneColor(sampleZone[i]);
+    col.push(c.r,c.g,c.b, c.r,c.g,c.b);
+    cpos.push(p.x, p.y, p.z); cpos.push(p.x, baseY, p.z);
+    const cc=c.clone().multiplyScalar(0.55);
+    ccol.push(cc.r,cc.g,cc.b, cc.r,cc.g,cc.b);
+  }
+  for(let i=0;i<N;i++){
+    const a=i*2, b=i*2+1, c2=i*2+2, d=i*2+3;
+    idx.push(a,b,d, a,d,c2);
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+  g.setIndex(idx); g.computeVertexNormals();
+  ribbonMesh=new THREE.Mesh(g,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.55,metalness:.15,side:THREE.DoubleSide}));
+  trackGroup.add(ribbonMesh);
+
+  // emissive glow copy
+  const g2=g.clone();
+  const glow=new THREE.Mesh(g2,new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:.18,side:THREE.DoubleSide}));
+  glow.position.y=0.3; trackGroup.add(glow);
+
+  // curtain
+  const cg=new THREE.BufferGeometry();
+  cg.setAttribute('position',new THREE.Float32BufferAttribute(cpos,3));
+  cg.setAttribute('color',new THREE.Float32BufferAttribute(ccol,3));
+  const cidx=[]; for(let i=0;i<N;i++){const a=i*2,b=i*2+1,c2=i*2+2,d=i*2+3; cidx.push(a,b,d,a,d,c2);}
+  cg.setIndex(cidx);
+  curtainMesh=new THREE.Mesh(cg,new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:.16,side:THREE.DoubleSide,depthWrite:false}));
+  trackGroup.add(curtainMesh);
+
+  // base grid
+  const grid=new THREE.GridHelper(620,40,0x1b2433,0x141a24);
+  grid.position.y=baseY-0.1; trackGroup.add(grid);
+
+  // start/finish line marker
+  const sf=samples[0];
+  const sfGeo=new THREE.BoxGeometry(hw*2.4,0.6,2.2);
+  const sfMesh=new THREE.Mesh(sfGeo,new THREE.MeshBasicMaterial({color:0xffffff}));
+  sfMesh.position.copy(sf); sfMesh.position.y+=0.5; trackGroup.add(sfMesh);
+
+  // corner marker poles
+  NODES.forEach((n)=>{ if(!n.c) return;
+    const v=nodeVec(n);
+    const c=zoneColor(n.z_);
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(.35,.35,9,8),
+      new THREE.MeshBasicMaterial({color:c}));
+    pole.position.set(v.x, v.y+4.5, v.z); trackGroup.add(pole);
+    const ball=new THREE.Mesh(new THREE.SphereGeometry(1.4,16,16),
+      new THREE.MeshStandardMaterial({color:c,emissive:c,emissiveIntensity:.6}));
+    ball.position.set(v.x, v.y+9.5, v.z); trackGroup.add(ball);
+  });
+}
+buildTrack();
+
+/* ---- moving car dot ---- */
+const car=new THREE.Mesh(new THREE.SphereGeometry(2.0,18,18),
+  new THREE.MeshStandardMaterial({color:'#fff',emissive:'#fff',emissiveIntensity:.5}));
+scene.add(car);
+let carT=0;
+
+/* ================= LABELS (HTML overlay) ================= */
+const labelsEl=document.getElementById('labels');
+let labelObjs=[];
+function buildLabels(){
+  labelObjs=[]; labelsEl.innerHTML='';
+  NODES.forEach((n)=>{ if(!n.c) return;
+    const el=document.createElement('div');
+    el.className='lab';
+    el.textContent=n.c;
+    const best=ZONES[n.z_].best;
+    el.style.background=TEAMS[best].color;
+    if(n.c==='S/F'){el.style.background='#e6edf3';}
+    el.title=ZONES[n.z_].tag+' — '+TEAMS[ZONES[n.z_].best].name;
+    el.addEventListener('click',()=>selectZone(n.z_));
+    labelsEl.appendChild(el);
+    labelObjs.push({el, pos:nodeVec(n).clone().setY(nodeVec(n).y+12)});
+  });
+}
+buildLabels();
+let showLabels=true;
+
+function updateLabels(){
+  const w=labelsEl.clientWidth, h=labelsEl.clientHeight;
+  labelObjs.forEach(o=>{
+    const p=o.pos.clone().project(camera);
+    const vis = p.z<1 && showLabels;
+    o.el.style.display = vis?'block':'none';
+    if(!vis) return;
+    o.el.style.left=((p.x*0.5+0.5)*w)+'px';
+    o.el.style.top=((-p.y*0.5+0.5)*h)+'px';
+    o.el.style.opacity = THREE.MathUtils.clamp(1.2-p.z,0.35,1);
+  });
+}
+
+/* ================= SIDE PANEL ================= */
+const legend=document.getElementById('legend');
+Object.entries(TEAMS).forEach(([k,t])=>{
+  const d=document.createElement('div'); d.className='lg';
+  d.innerHTML=`<span class="dot" style="background:${t.color}"></span>${t.name}<span style="color:var(--muted);font-weight:400">·${t.who}</span>`;
+  legend.appendChild(d);
+});
+const listEl=document.getElementById('list');
+ZONES.forEach((z,zi)=>{
+  const t=TEAMS[z.best];
+  const el=document.createElement('div'); el.className='zone'; el.dataset.zone=zi;
+  el.innerHTML=`<div class="zbar" style="background:${t.color}"></div>
+    <div style="flex:1">
+      <div class="zhead">
+        <span class="ztag">${z.tag}</span>
+        <span class="badge" style="background:${t.color}">${t.name}</span>
+      </div>
+      <div class="zname">${z.name}</div>
+      <div class="zwhy">${z.why}<br><span style="color:var(--muted)">${z.en}</span></div>
+    </div>`;
+  el.addEventListener('click',()=>selectZone(zi));
+  listEl.appendChild(el);
+});
+
+const tt=document.getElementById('tt');
+let activeZone=-1;
+function selectZone(zi){
+  activeZone=zi;
+  document.querySelectorAll('.zone').forEach(e=>e.classList.toggle('active', +e.dataset.zone===zi));
+  const active=document.querySelector('.zone.active'); if(active) active.scrollIntoView({block:'nearest',behavior:'smooth'});
+  const z=ZONES[zi], t=TEAMS[z.best];
+  tt.className='tt show';
+  tt.innerHTML=`<h3>${z.tag}</h3><div class="nm">${z.name}</div>
+    <div class="car" style="color:${t.color}"><span class="dot" style="background:${t.color}"></span>가장 강한 차: ${t.name} <span style="color:var(--muted);font-weight:500">(${t.who})</span></div>
+    <p>${z.why}</p><div class="en">${z.en}</div>`;
+  buildHighlight(zi);
+}
+function buildHighlight(zi){
+  if(highlightMesh){trackGroup.remove(highlightMesh);highlightMesh.geometry.dispose();highlightMesh=null;}
+  const N=samples.length-1, hw=5.6, up=new THREE.Vector3(0,1,0);
+  const pos=[],idx=[],tmpDir=new THREE.Vector3(),right=new THREE.Vector3();
+  let count=0, map=[];
+  for(let i=0;i<=N;i++){ if(sampleZone[i]!==zi){map.push(-1);continue;}
+    const p=samples[i],pn=samples[(i+1)%(N+1)];
+    tmpDir.subVectors(pn,p).normalize(); right.crossVectors(tmpDir,up).normalize().multiplyScalar(hw);
+    pos.push(p.x-right.x,p.y+0.6,p.z-right.z); pos.push(p.x+right.x,p.y+0.6,p.z+right.z);
+    map.push(count); count++;
+  }
+  for(let i=0;i<N;i++){ if(map[i]>=0 && map[i+1]>=0){const a=map[i]*2,b=map[i]*2+1,c=map[i+1]*2,d=map[i+1]*2+1; idx.push(a,b,d,a,d,c);} }
+  if(!pos.length) return;
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); g.setIndex(idx);
+  highlightMesh=new THREE.Mesh(g,new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.85,side:THREE.DoubleSide}));
+  trackGroup.add(highlightMesh);
+}
+
+/* ================= CAMERA FIT ================= */
+function fit(){
+  const box=new THREE.Box3().setFromObject(ribbonMesh);
+  const c=box.getCenter(new THREE.Vector3()), s=box.getSize(new THREE.Vector3());
+  controls.target.copy(c);
+  const r=Math.max(s.x,s.z);
+  camera.position.set(c.x - r*0.15, c.y + r*0.95, c.z + r*1.15);
+  camera.near=0.5; camera.far=r*12; camera.updateProjectionMatrix();
+}
+fit();
+
+/* ================= CONTROLS UI ================= */
+let auto=false;
+document.getElementById('bRotate').onclick=e=>{auto=!auto;e.target.classList.toggle('on',auto);};
+document.getElementById('bLabels').onclick=e=>{showLabels=!showLabels;e.target.classList.toggle('on',showLabels);};
+document.getElementById('bReset').onclick=()=>{fit();};
+document.getElementById('bExag').onclick=e=>{
+  EXAG = EXAG>2.2 ? 2.2 : 4.2; e.target.classList.toggle('on',EXAG>2.2);
+  buildTrack(); buildLabels();
+  if(activeZone>=0) buildHighlight(activeZone);
+};
+
+/* ================= RESIZE / LOOP ================= */
+function resize(){
+  const w=canvas.clientWidth,h=canvas.clientHeight;
+  if(canvas.width!==w*Math.min(devicePixelRatio,2)||canvas.height!==h*Math.min(devicePixelRatio,2)){
+    renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
+  }
+}
+function loop(){
+  requestAnimationFrame(loop);
+  resize();
+  if(auto) controls.autoRotate=true, controls.autoRotateSpeed=0.6; else controls.autoRotate=false;
+  controls.update();
+  carT=(carT+0.0009)%1;
+  const cp=curve.getPointAt(carT); car.position.copy(cp); car.position.y+=2.2;
+  let bi=0,bd=1e9; for(let i=0;i<NODES.length;i++){const v=nodeVec(NODES[i]);const d=cp.distanceToSquared(v);if(d<bd){bd=d;bi=i;}}
+  const cc=zoneColor(NODES[bi].z_); car.material.color.copy(cc); car.material.emissive.copy(cc);
+  if(highlightMesh){highlightMesh.material.opacity=0.55+0.35*Math.abs(Math.sin(performance.now()*0.004));}
+  updateLabels();
+  renderer.render(scene,camera);
+}
+loop();
+selectZone(8); // open with Maggotts-Becketts-Chapel (the signature high-speed esses)
+</script>
+</body>
+</html>

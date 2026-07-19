@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>F1 결과 예측 자료 모음</title>
+<style>
+  :root{
+    --bg:#0a0e14; --card:#11161f; --card2:#161d28; --line:#222c3a;
+    --txt:#e6edf3; --muted:#8b97a7; --gold:#FFD23F;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:
+      radial-gradient(1200px 600px at 80% -10%, #16314a55, transparent),
+      radial-gradient(900px 500px at 0% 0%, #2a103a44, transparent),
+      var(--bg);
+    color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo",Roboto,sans-serif;
+    line-height:1.5;min-height:100vh;padding:40px 20px 70px}
+  .wrap{max-width:880px;margin:0 auto}
+  .kik{color:var(--gold);font-weight:800;font-size:12px;letter-spacing:2px;text-transform:uppercase}
+  h1{font-size:30px;letter-spacing:-.5px;margin:6px 0 6px}
+  .lead{color:var(--muted);font-size:14px;margin-bottom:28px}
+  .grid{display:grid;grid-template-columns:1fr;gap:14px}
+  .gp{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;transition:.15s}
+  .gp:hover{border-color:#3a4658}
+  .gp .rnd{color:var(--gold);font-weight:800;font-size:11px;letter-spacing:1.5px;text-transform:uppercase}
+  .gp h2{font-size:21px;margin:5px 0 4px}
+  .gp .when{color:var(--muted);font-size:13px;margin-bottom:6px}
+  .gp .note{color:#cdd6e0;font-size:13px;line-height:1.6;margin-bottom:14px}
+  .links{display:flex;gap:10px;flex-wrap:wrap}
+  .lk{display:inline-flex;align-items:center;gap:7px;background:var(--card2);border:1px solid var(--line);
+    border-radius:10px;padding:10px 14px;color:var(--txt);text-decoration:none;font-size:13px;font-weight:600;transition:.15s}
+  .lk:hover{border-color:var(--gold);color:var(--gold)}
+  .lk .em{font-size:15px}
+  .arch{opacity:.72}
+  footer{margin-top:34px;color:var(--muted);font-size:11.5px;line-height:1.7;border-top:1px solid var(--line);padding-top:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kik">🏁 Formula 1 · 2026</div>
+  <h1>F1 결과 예측 자료 모음</h1>
+  <div class="lead">그랑프리별로 만든 <b style="color:var(--txt)">포디움 예측 대시보드</b>와 <b style="color:var(--txt)">코너별 최강 차 3D 트랙</b>. 새 자료는 위에 쌓이고, 이전 자료도 그대로 남습니다.</div>
+
+  <div class="grid">
+    <!-- 최신 GP가 위로 -->
+    <div class="gp">
+      <div class="rnd">Round 10 / 22 · Spa-Francorchamps</div>
+      <h2>🇧🇪 2026 벨기에 GP</h2>
+      <div class="when">결승 7월 19일(일) 오후 3시 현지 · 44바퀴</div>
+      <div class="note">폴은 안토넬리(메르세데스, 시즌 6번째). 마른 경기가 기본이지만 아르덴 소나기 변수. 노리스는 예선 3위→벌점으로 13번 출발. 예상 1위 — 정상 <b>안토넬리</b> / 돌발 <b>베르스타펜</b> / 우천 <b>베르스타펜</b>.</div>
+      <div class="links">
+        <a class="lk" href="spa.html"><span class="em">🏆</span> 포디움 예측 대시보드</a>
+        <a class="lk" href="spa.html#track3d"><span class="em">🌐</span> 코너별 최강 차 3D</a>
+      </div>
+    </div>
+
+    <div class="gp arch">
+      <div class="rnd">Round 9 / 24 · Silverstone · 스프린트 주간</div>
+      <h2>🇬🇧 2026 영국 GP</h2>
+      <div class="when">결승 7월 5일(일) 오후 3시 현지 · 52바퀴</div>
+      <div class="note">폴은 안토넬리(메르세데스). 맑고 건조한 드문 실버스톤 레이스. 예상 1위 — 정상 <b>안토넬리</b> / 돌발 <b>르클레르</b> / 우천 <b>해밀턴</b>. <span style="color:var(--muted)">(실제 결과: 르클레르 우승·러셀 2위·해밀턴 3위 — 안토넬리는 휠 부품 문제)</span></div>
+      <div class="links">
+        <a class="lk" href="silverstone-prediction.html"><span class="em">🏆</span> 포디움 예측 대시보드</a>
+        <a class="lk" href="silverstone-track3d.html"><span class="em">🌐</span> 코너별 최강 차 3D</a>
+      </div>
+    </div>
+
+    <div class="gp arch">
+      <div class="rnd">Round 8 / 22 · Red Bull Ring</div>
+      <h2>🇦🇹 2026 오스트리아 GP</h2>
+      <div class="when">결승 6월 28일(일) 오후 3시 현지 · 71바퀴</div>
+      <div class="note">폴은 러셀(메르세데스). 폭염·건조 레이스. 예상 1위 — 정상 <b>러셀</b> / 카오스 <b>베르스타펜</b> / 우천 <b>베르스타펜</b>. <span style="color:var(--muted)">(실제 결과: 러셀 우승·베르스타펜 2위·안토넬리 3위)</span></div>
+      <div class="links">
+        <a class="lk" href="austria-prediction.html"><span class="em">🏆</span> 포디움 예측 대시보드</a>
+        <a class="lk" href="austria-track3d.html"><span class="em">🌐</span> 코너별 최강 차 3D</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    ※ 각 자료는 여러 AI 에이전트의 웹 리서치와 적대적 교차검증으로 만든 <b>확률적 예측</b>이며 실제 결과를 보장하지 않습니다. <br>
+    새 그랑프리 자료는 <code>/f1-prediction &lt;그랑프리&gt;</code> 커맨드로 생성됩니다.
+  </footer>
+</div>
+</body>
+</html>

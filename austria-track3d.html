@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>레드불링 3D · 코너별 최강 차 (2026 오스트리아 GP)</title>
+<style>
+  :root{
+    --mer:#27F4D2; --fer:#FF2D2D; --rbr:#3671C6;
+    --bg:#0a0e14; --panel:#11161f; --panel2:#161d28; --line:#222c3a;
+    --txt:#e6edf3; --muted:#8b97a7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo",Roboto,sans-serif;
+    overflow:hidden}
+  #app{display:flex;height:100vh;width:100vw}
+  /* ---- side panel ---- */
+  #side{width:360px;min-width:360px;height:100%;background:var(--panel);
+    border-right:1px solid var(--line);display:flex;flex-direction:column}
+  #side header{padding:18px 20px 14px;border-bottom:1px solid var(--line)}
+  #side header h1{font-size:18px;letter-spacing:-.3px;line-height:1.25}
+  #side header .sub{color:var(--muted);font-size:12px;margin-top:6px;line-height:1.5}
+  .legend{display:flex;gap:8px;padding:12px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .lg{display:flex;align-items:center;gap:7px;background:var(--panel2);
+    padding:6px 10px;border-radius:20px;font-size:12px;font-weight:600}
+  .dot{width:12px;height:12px;border-radius:50%}
+  .list{overflow-y:auto;flex:1;padding:8px 12px 80px}
+  .zone{display:flex;gap:12px;padding:11px 12px;border-radius:11px;cursor:pointer;
+    border:1px solid transparent;transition:.15s;align-items:flex-start}
+  .zone:hover{background:var(--panel2)}
+  .zone.active{background:var(--panel2);border-color:var(--line)}
+  .zbar{width:5px;border-radius:4px;align-self:stretch;min-height:38px}
+  .zhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .ztag{font-weight:800;font-size:14px}
+  .zname{color:var(--muted);font-size:12px}
+  .badge{font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;color:#03121a}
+  .zwhy{color:#b9c4d2;font-size:12px;line-height:1.55;margin-top:5px;display:none}
+  .zone.active .zwhy{display:block}
+  .controls{padding:12px 20px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap;background:var(--panel)}
+  .btn{background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+    font-size:12px;font-weight:600;padding:8px 12px;border-radius:9px;cursor:pointer}
+  .btn:hover{border-color:#3a4658}
+  .btn.on{background:#1f6feb22;border-color:#1f6feb;color:#7db3ff}
+  .foot{padding:10px 20px;border-top:1px solid var(--line);color:var(--muted);font-size:10.5px;line-height:1.5}
+  /* ---- canvas ---- */
+  #scene{flex:1;position:relative}
+  #c{display:block;width:100%;height:100%}
+  #labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .lab{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;cursor:pointer;
+    font-size:11px;font-weight:800;color:#03121a;padding:3px 8px;border-radius:8px;white-space:nowrap;
+    box-shadow:0 2px 8px #0008;border:1.5px solid #ffffff55;transition:transform .12s}
+  .lab:hover{transform:translate(-50%,-50%) scale(1.12)}
+  .lab .sf{filter:grayscale(1)}
+  .hint{position:absolute;left:14px;bottom:12px;color:var(--muted);font-size:11px;
+    background:#0a0e14aa;padding:6px 10px;border-radius:8px;border:1px solid var(--line);backdrop-filter:blur(4px)}
+  .tt{position:absolute;top:14px;right:14px;background:#0a0e14cc;border:1px solid var(--line);
+    border-radius:12px;padding:14px 16px;width:260px;backdrop-filter:blur(6px);display:none}
+  .tt.show{display:block}
+  .tt h3{font-size:15px;margin-bottom:4px}
+  .tt .nm{color:var(--muted);font-size:12px;margin-bottom:8px}
+  .tt .car{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:13px;margin-bottom:8px}
+  .tt p{font-size:12.5px;line-height:1.6;color:#cdd6e0}
+  .tt .en{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
+  @media(max-width:760px){#side{width:300px;min-width:300px}}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="side">
+    <header>
+      <h1>🏁 레드불링 3D · 코너별 최강 차</h1>
+      <div class="sub">2026 오스트리아 GP · Spielberg · 10코너 / 고저차 ≈65m<br>각 구간 = <b>2026 시즌 폼 기준</b> 가장 강한 차</div>
+    </header>
+    <div class="legend" id="legend"></div>
+    <div class="list" id="list"></div>
+    <div class="controls">
+      <button class="btn" id="bRotate">⟳ 자동회전</button>
+      <button class="btn on" id="bLabels">🏷 코너라벨</button>
+      <button class="btn" id="bExag">⛰ 고저차 강조</button>
+      <button class="btn" id="bReset">⊙ 시점초기화</button>
+    </div>
+    <div class="foot">
+      ※ 트랙 형상·고저는 실제 레이아웃을 반영한 <b>스타일라이즈드(개략) 3D</b>이며, 코너별 차량 우열은
+      2026 시즌 검증된 폼(메르세데스 전개/그립 우위, 레드불 고속, 페라리 저속·제동)에 근거.
+      출처: Formula1.com, The Race, PlanetF1, Total-Motorsport, Wikipedia.
+    </div>
+  </aside>
+  <div id="scene">
+    <canvas id="c"></canvas>
+    <div id="labels"></div>
+    <div class="hint">드래그=회전 · 휠=줌 · 우클릭드래그=이동 · 코너 클릭=상세</div>
+    <div class="tt" id="tt"></div>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ================= DATA ================= */
+const TEAMS = {
+  MER:{ name:'Mercedes', who:'러셀 · 안토넬리', color:'#27F4D2' },
+  FER:{ name:'Ferrari',  who:'르클레르 · 해밀턴', color:'#FF2D2D' },
+  RBR:{ name:'Red Bull', who:'베르스타펜',        color:'#3671C6' },
+};
+// zones in driving order; best = which 2026 car is strongest here
+const ZONES = [
+  { tag:'S/F 직선', name:'Start/Finish Straight', best:'MER',
+    why:'메르세데스 W17의 PU 에너지 전개(deployment)와 직선 속도가 2026 그리드 최강. 같은 엔진을 쓰는 맥라렌조차 전개 효율에서 못 따라온다.',
+    en:'Mercedes has the best power-unit deployment & top speed of the 2026 field.' },
+  { tag:'T1', name:'Niki Lauda Kurve · 오르막 헤비브레이킹 90° 우', best:'MER',
+    why:'오르막 강제동 후 중속 우코너. 메르세데스가 제동 안정성과 코너 그립에서 우위.',
+    en:'Uphill heavy braking into a medium right — Mercedes braking & grip lead.' },
+  { tag:'T2', name:'Münzer · 오르막 고속 킥', best:'RBR',
+    why:'가장 가파른 오르막의 빠른 킥 코너. 고속 코너에서는 레드불이 가장 강하다.',
+    en:'Fast uphill kink — Red Bull excels in high-speed corners.' },
+  { tag:'T2→T3 직선', name:'Back Straight · 최장 직선 / X-mode 구간', best:'MER',
+    why:'서킷 최장 직선이자 액티브에어로 X-mode 구간. 메르세데스 전개·직선 속도 지배.',
+    en:'Longest straight & X-mode zone — Mercedes deployment dominates.' },
+  { tag:'T3', name:'Schlossgold · 랩 최저속 코너(≈84km/h)', best:'FER',
+    why:'331→84km/h, 5.3G의 헤비 브레이킹 후 최저속 코너. 페라리의 작은 터보 저rpm 토크와 제동력이 빛난다.',
+    en:'Slowest corner + 5.3G braking — Ferrari low-end turbo punch & braking shine.' },
+  { tag:'T4', name:'Rauch Kurve · 바깥으로 기우는 중저속 우', best:'FER',
+    why:'노면이 바깥으로 기우는 중저속 제동 코너. 저속 트랙션에서 페라리가 유리.',
+    en:'Off-camber medium-slow braking right — Ferrari slow-corner traction.' },
+  { tag:'T5–T6', name:'인필드 · 중속 다운힐 에세스', best:'MER',
+    why:'그립 제한(grip-limited) 중속 연속 코너. 메르세데스가 전체 그립과 방향전환 민첩성에서 최고.',
+    en:'Grip-limited medium esses — Mercedes best overall grip & agility.' },
+  { tag:'T7–T8', name:'Graz · 고속 다운힐 흐름', best:'RBR',
+    why:'빠르게 흐르는 다운힐 고속 구간. 고속 코너 강자 레드불의 영역.',
+    en:'Flowing high-speed downhill — Red Bull territory.' },
+  { tag:'T9', name:'Jochen Rindt Kurve · 거의 블라인드 고속 우', best:'RBR',
+    why:'탈출이 거의 보이지 않는 고속 우코너. 레드불의 고속 안정감이 강점.',
+    en:'Near-blind high-speed right — Red Bull high-speed stability.' },
+  { tag:'T10', name:'최종 코너 · 메인직선行 트랙션 탈출', best:'FER',
+    why:'메인 직선으로 가속해 나가는 최종 저속 코너. 탈출 트랙션에서 페라리 저rpm 펀치가 유리.',
+    en:'Final slow corner onto main straight — Ferrari exit traction.' },
+];
+// centerline waypoints (stylized RBR layout). x,z = top-down, e = elevation. zone index per node.
+const NODES = [
+  {x:0,  z:0,   e:0,  z_:0, c:'S/F'},
+  {x:3,  z:40,  e:6,  z_:0},
+  {x:8,  z:78,  e:14, z_:0},
+  {x:14, z:100, e:20, z_:1, c:'T1'},
+  {x:40, z:112, e:28, z_:1},
+  {x:80, z:128, e:38, z_:2, c:'T2'},
+  {x:120,z:150, e:50, z_:3},
+  {x:150,z:172, e:60, z_:3},
+  {x:170,z:190, e:65, z_:4, c:'T3'},
+  {x:158,z:208, e:60, z_:4},
+  {x:132,z:222, e:53, z_:5, c:'T4'},
+  {x:104,z:230, e:45, z_:5},
+  {x:78, z:232, e:39, z_:6, c:'T5'},
+  {x:55, z:222, e:31, z_:6, c:'T6'},
+  {x:44, z:200, e:24, z_:7},
+  {x:42, z:176, e:19, z_:7, c:'T7'},
+  {x:48, z:150, e:15, z_:7},
+  {x:58, z:128, e:14, z_:7, c:'T8'},
+  {x:54, z:96,  e:10, z_:8, c:'T9'},
+  {x:44, z:64,  e:6,  z_:8},
+  {x:28, z:38,  e:3,  z_:9, c:'T10'},
+  {x:10, z:14,  e:1,  z_:9},
+];
+
+/* ================= SETUP ================= */
+const canvas = document.getElementById('c');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#0a0e14');
+scene.fog = new THREE.Fog('#0a0e14', 380, 820);
+
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+
+const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 3000);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.maxPolarAngle = Math.PI*0.49;
+
+scene.add(new THREE.HemisphereLight('#bcd3ff','#0a0e14', 1.1));
+const dir = new THREE.DirectionalLight('#ffffff', 1.6);
+dir.position.set(120,260,80); scene.add(dir);
+
+/* center the layout */
+let cx=0,cz=0; NODES.forEach(n=>{cx+=n.x;cz+=n.z}); cx/=NODES.length; cz/=NODES.length;
+let EXAG = 1.5;
+function nodeVec(n){ return new THREE.Vector3(n.x-cx, n.e*EXAG, n.z-cz); }
+
+const trackGroup = new THREE.Group();
+scene.add(trackGroup);
+
+const colMER=new THREE.Color(TEAMS.MER.color), colFER=new THREE.Color(TEAMS.FER.color), colRBR=new THREE.Color(TEAMS.RBR.color);
+function zoneColor(zi){ const b=ZONES[zi].best; return b==='MER'?colMER:b==='FER'?colFER:colRBR; }
+
+let curve, samples, sampleZone, ribbonMesh, curtainMesh, edgeLines, highlightMesh;
+
+function buildTrack(){
+  // clear
+  while(trackGroup.children.length) trackGroup.remove(trackGroup.children[0]);
+  const pts = NODES.map(nodeVec);
+  curve = new THREE.CatmullRomCurve3(pts, true, 'centripetal');
+  const N = 900;
+  samples = curve.getSpacedPoints(N);
+  // assign each sample a zone via nearest node
+  const nodePos = pts;
+  sampleZone = samples.map(s=>{
+    let bi=0,bd=1e9;
+    for(let i=0;i<nodePos.length;i++){const d=s.distanceToSquared(nodePos[i]); if(d<bd){bd=d;bi=i;}}
+    return NODES[bi].z_;
+  });
+
+  const hw = 4.4;            // half track width
+  const up = new THREE.Vector3(0,1,0);
+  const pos=[], col=[], idx=[];
+  const cpos=[], ccol=[];    // curtain (centerline -> base)
+  const baseY = -2;
+  const tmpDir=new THREE.Vector3(), right=new THREE.Vector3();
+  for(let i=0;i<=N;i++){
+    const p=samples[i], pn=samples[(i+1)%(N+1)];
+    tmpDir.subVectors(pn,p).normalize();
+    right.crossVectors(tmpDir,up).normalize().multiplyScalar(hw);
+    // ribbon verts (left,right)
+    pos.push(p.x-right.x, p.y, p.z-right.z);
+    pos.push(p.x+right.x, p.y, p.z+right.z);
+    const c=zoneColor(sampleZone[i]);
+    col.push(c.r,c.g,c.b, c.r,c.g,c.b);
+    // curtain verts (top center, bottom center)
+    cpos.push(p.x, p.y, p.z); cpos.push(p.x, baseY, p.z);
+    const cc=c.clone().multiplyScalar(0.55);
+    ccol.push(cc.r,cc.g,cc.b, cc.r,cc.g,cc.b);
+  }
+  for(let i=0;i<N;i++){
+    const a=i*2, b=i*2+1, c2=i*2+2, d=i*2+3;
+    idx.push(a,b,d, a,d,c2);
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+  g.setIndex(idx); g.computeVertexNormals();
+  ribbonMesh=new THREE.Mesh(g,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.55,metalness:.15,side:THREE.DoubleSide,emissive:'#000',emissiveIntensity:.0}));
+  trackGroup.add(ribbonMesh);
+
+  // emissive glow copy (slightly raised) for vividness
+  const g2=g.clone();
+  const glow=new THREE.Mesh(g2,new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:.18,side:THREE.DoubleSide}));
+  glow.position.y=0.3; trackGroup.add(glow);
+
+  // curtain
+  const cg=new THREE.BufferGeometry();
+  cg.setAttribute('position',new THREE.Float32BufferAttribute(cpos,3));
+  cg.setAttribute('color',new THREE.Float32BufferAttribute(ccol,3));
+  const cidx=[]; for(let i=0;i<N;i++){const a=i*2,b=i*2+1,c2=i*2+2,d=i*2+3; cidx.push(a,b,d,a,d,c2);}
+  cg.setIndex(cidx);
+  curtainMesh=new THREE.Mesh(cg,new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:.16,side:THREE.DoubleSide,depthWrite:false}));
+  trackGroup.add(curtainMesh);
+
+  // base grid at baseY
+  const grid=new THREE.GridHelper(620,40,0x1b2433,0x141a24);
+  grid.position.y=baseY-0.1; trackGroup.add(grid);
+
+  // start/finish line marker
+  const sf=samples[0];
+  const sfGeo=new THREE.BoxGeometry(hw*2.4,0.6,2.2);
+  const sfMesh=new THREE.Mesh(sfGeo,new THREE.MeshBasicMaterial({color:0xffffff}));
+  sfMesh.position.copy(sf); sfMesh.position.y+=0.5; trackGroup.add(sfMesh);
+
+  // corner marker poles
+  NODES.forEach((n)=>{ if(!n.c) return;
+    const v=nodeVec(n);
+    const c=zoneColor(n.z_);
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(.35,.35,9,8),
+      new THREE.MeshBasicMaterial({color:c}));
+    pole.position.set(v.x, v.y+4.5, v.z); trackGroup.add(pole);
+    const ball=new THREE.Mesh(new THREE.SphereGeometry(1.4,16,16),
+      new THREE.MeshStandardMaterial({color:c,emissive:c,emissiveIntensity:.6}));
+    ball.position.set(v.x, v.y+9.5, v.z); trackGroup.add(ball);
+  });
+}
+buildTrack();
+
+/* ---- moving car dot ---- */
+const car=new THREE.Mesh(new THREE.SphereGeometry(2.0,18,18),
+  new THREE.MeshStandardMaterial({color:'#fff',emissive:'#fff',emissiveIntensity:.5}));
+scene.add(car);
+let carT=0;
+
+/* ================= LABELS (HTML overlay) ================= */
+const labelsEl=document.getElementById('labels');
+const labelObjs=[];
+NODES.forEach((n,ni)=>{ if(!n.c) return;
+  const el=document.createElement('div');
+  el.className='lab';
+  el.textContent=n.c;
+  const best=ZONES[n.z_].best;
+  el.style.background=TEAMS[best].color;
+  if(n.c==='S/F'){el.style.background='#e6edf3';}
+  el.dataset.zone=n.z_;
+  el.title=ZONES[n.z_].tag+' — '+TEAMS[ZONES[n.z_].best].name;
+  el.addEventListener('click',()=>selectZone(n.z_));
+  labelsEl.appendChild(el);
+  labelObjs.push({el, pos:nodeVec(n).clone().setY(nodeVec(n).y+12)});
+});
+let showLabels=true;
+
+function updateLabels(){
+  const w=labelsEl.clientWidth, h=labelsEl.clientHeight;
+  labelObjs.forEach(o=>{
+    const p=o.pos.clone().project(camera);
+    const vis = p.z<1 && showLabels;
+    o.el.style.display = vis?'block':'none';
+    if(!vis) return;
+    o.el.style.left=((p.x*0.5+0.5)*w)+'px';
+    o.el.style.top=((-p.y*0.5+0.5)*h)+'px';
+    o.el.style.opacity = THREE.MathUtils.clamp(1.2-p.z,0.35,1);
+  });
+}
+
+/* ================= SIDE PANEL ================= */
+const legend=document.getElementById('legend');
+Object.entries(TEAMS).forEach(([k,t])=>{
+  const d=document.createElement('div'); d.className='lg';
+  d.innerHTML=`<span class="dot" style="background:${t.color}"></span>${t.name}<span style="color:var(--muted);font-weight:400">·${t.who}</span>`;
+  legend.appendChild(d);
+});
+const listEl=document.getElementById('list');
+ZONES.forEach((z,zi)=>{
+  const t=TEAMS[z.best];
+  const el=document.createElement('div'); el.className='zone'; el.dataset.zone=zi;
+  el.innerHTML=`<div class="zbar" style="background:${t.color}"></div>
+    <div style="flex:1">
+      <div class="zhead">
+        <span class="ztag">${z.tag}</span>
+        <span class="badge" style="background:${t.color}">${t.name}</span>
+      </div>
+      <div class="zname">${z.name}</div>
+      <div class="zwhy">${z.why}<br><span style="color:var(--muted)">${z.en}</span></div>
+    </div>`;
+  el.addEventListener('click',()=>selectZone(zi));
+  listEl.appendChild(el);
+});
+
+const tt=document.getElementById('tt');
+let activeZone=-1;
+function selectZone(zi){
+  activeZone=zi;
+  document.querySelectorAll('.zone').forEach(e=>e.classList.toggle('active', +e.dataset.zone===zi));
+  const active=document.querySelector('.zone.active'); if(active) active.scrollIntoView({block:'nearest',behavior:'smooth'});
+  document.querySelectorAll('.lab').forEach(e=>{e.style.transform='translate(-50%,-50%)';});
+  const z=ZONES[zi], t=TEAMS[z.best];
+  tt.className='tt show';
+  tt.innerHTML=`<h3>${z.tag}</h3><div class="nm">${z.name}</div>
+    <div class="car" style="color:${t.color}"><span class="dot" style="background:${t.color}"></span>최강: ${t.name} <span style="color:var(--muted);font-weight:500">(${t.who})</span></div>
+    <p>${z.why}</p><div class="en">${z.en}</div>`;
+  buildHighlight(zi);
+}
+function buildHighlight(zi){
+  if(highlightMesh){trackGroup.remove(highlightMesh);highlightMesh.geometry.dispose();highlightMesh=null;}
+  const N=samples.length-1, hw=5.6, up=new THREE.Vector3(0,1,0);
+  const pos=[],idx=[],tmpDir=new THREE.Vector3(),right=new THREE.Vector3();
+  let count=0, map=[];
+  for(let i=0;i<=N;i++){ if(sampleZone[i]!==zi){map.push(-1);continue;}
+    const p=samples[i],pn=samples[(i+1)%(N+1)];
+    tmpDir.subVectors(pn,p).normalize(); right.crossVectors(tmpDir,up).normalize().multiplyScalar(hw);
+    pos.push(p.x-right.x,p.y+0.6,p.z-right.z); pos.push(p.x+right.x,p.y+0.6,p.z+right.z);
+    map.push(count); count++;
+  }
+  for(let i=0;i<N;i++){ if(map[i]>=0 && map[i+1]>=0){const a=map[i]*2,b=map[i]*2+1,c=map[i+1]*2,d=map[i+1]*2+1; idx.push(a,b,d,a,d,c);} }
+  if(!pos.length) return;
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); g.setIndex(idx);
+  highlightMesh=new THREE.Mesh(g,new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.85,side:THREE.DoubleSide}));
+  trackGroup.add(highlightMesh);
+}
+
+/* ================= CAMERA FIT ================= */
+function fit(){
+  const box=new THREE.Box3().setFromObject(ribbonMesh);
+  const c=box.getCenter(new THREE.Vector3()), s=box.getSize(new THREE.Vector3());
+  controls.target.copy(c);
+  const r=Math.max(s.x,s.z);
+  camera.position.set(c.x - r*0.15, c.y + r*0.95, c.z + r*1.15);
+  camera.near=0.5; camera.far=r*12; camera.updateProjectionMatrix();
+}
+fit();
+
+/* ================= CONTROLS UI ================= */
+let auto=false;
+document.getElementById('bRotate').onclick=e=>{auto=!auto;e.target.classList.toggle('on',auto);};
+document.getElementById('bLabels').onclick=e=>{showLabels=!showLabels;e.target.classList.toggle('on',showLabels);};
+document.getElementById('bReset').onclick=()=>{fit();};
+document.getElementById('bExag').onclick=e=>{
+  EXAG = EXAG>1.5 ? 1.5 : 2.6; e.target.classList.toggle('on',EXAG>1.5);
+  buildTrack(); labelObjs.length=0; labelsEl.innerHTML='';
+  // rebuild labels
+  NODES.forEach((n)=>{ if(!n.c) return;
+    const el=document.createElement('div'); el.className='lab'; el.textContent=n.c;
+    const best=ZONES[n.z_].best; el.style.background = n.c==='S/F'?'#e6edf3':TEAMS[best].color;
+    el.addEventListener('click',()=>selectZone(n.z_));
+    labelsEl.appendChild(el);
+    labelObjs.push({el,pos:nodeVec(n).clone().setY(nodeVec(n).y+12)});
+  });
+  if(activeZone>=0) buildHighlight(activeZone);
+};
+
+/* ================= RESIZE / LOOP ================= */
+function resize(){
+  const w=canvas.clientWidth,h=canvas.clientHeight;
+  if(canvas.width!==w*Math.min(devicePixelRatio,2)||canvas.height!==h*Math.min(devicePixelRatio,2)){
+    renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
+  }
+}
+function loop(){
+  requestAnimationFrame(loop);
+  resize();
+  if(auto) controls.autoRotate=true, controls.autoRotateSpeed=0.6; else controls.autoRotate=false;
+  controls.update();
+  // move car
+  carT=(carT+0.0009)%1;
+  const cp=curve.getPointAt(carT); car.position.copy(cp); car.position.y+=2.2;
+  // color car by nearest zone
+  let bi=0,bd=1e9; for(let i=0;i<NODES.length;i++){const v=nodeVec(NODES[i]);const d=cp.distanceToSquared(v);if(d<bd){bd=d;bi=i;}}
+  const cc=zoneColor(NODES[bi].z_); car.material.color.copy(cc); car.material.emissive.copy(cc);
+  if(highlightMesh){highlightMesh.material.opacity=0.55+0.35*Math.abs(Math.sin(performance.now()*0.004));}
+  updateLabels();
+  renderer.render(scene,camera);
+}
+loop();
+selectZone(4); // open with T3 (the signature corner)
+</script>
+</body>
+</html>
