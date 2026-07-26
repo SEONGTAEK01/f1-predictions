@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2026 헝가리 GP · 예측 + 코너별 최강 차 3D (Hungaroring)</title>
+<style>
+  :root{
+    --mer:#27F4D2; --fer:#FF2D2D; --rbr:#3671C6; --mcl:#FF8000; --rb:#6692FF; --ast:#229971;
+    --bg:#0a0e14; --card:#11161f; --card2:#161d28; --line:#222c3a;
+    --panel:#11161f; --panel2:#161d28;
+    --txt:#e6edf3; --muted:#8b97a7; --gold:#FFD23F;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:
+      radial-gradient(1200px 600px at 80% -10%, #16314a55, transparent),
+      radial-gradient(900px 500px at 0% 0%, #2a103a44, transparent),
+      var(--bg);
+    color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo",Roboto,sans-serif;
+    line-height:1.5;min-height:100vh;padding:28px 20px 60px}
+  .wrap{max-width:1080px;margin:0 auto}
+  header.top{margin-bottom:22px}
+  .kik{color:var(--gold);font-weight:800;font-size:12px;letter-spacing:2px;text-transform:uppercase}
+  h1{font-size:30px;letter-spacing:-.5px;margin:6px 0 8px}
+  .meta{color:var(--muted);font-size:13px}
+  .meta b{color:var(--txt)}
+  /* fact strip */
+  .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0}
+  .fact{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .fact h4{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .fact .big{font-size:15px;font-weight:700;margin-bottom:4px}
+  .fact .sub{font-size:12px;color:var(--muted);line-height:1.5}
+  /* tabs */
+  .tabs{display:flex;gap:8px;margin:26px 0 6px;flex-wrap:wrap}
+  .tab{flex:1;min-width:160px;background:var(--card);border:1px solid var(--line);border-radius:13px;
+    padding:13px 15px;cursor:pointer;transition:.15s;text-align:left}
+  .tab:hover{border-color:#3a4658}
+  .tab.on{border-color:var(--gold);background:linear-gradient(180deg,#1c1a10,var(--card))}
+  .tab .nm{font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px}
+  .tab .lk{color:var(--muted);font-size:12px;margin-top:6px}
+  .bar{height:6px;border-radius:4px;margin-top:7px;overflow:hidden;background:#1b2433}
+  .bar i{display:block;height:100%;border-radius:4px}
+  /* podium panel */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;margin-top:14px}
+  .ph{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+  .ph h2{font-size:20px}
+  .ph .tag{font-size:13px;color:var(--muted)}
+  .podium{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:14px;align-items:end;max-width:680px;margin:0 auto 8px}
+  .step{border-radius:14px 14px 0 0;padding:16px 12px;text-align:center;position:relative;border:1px solid #ffffff14;border-bottom:none}
+  .step .pos{font-size:30px;font-weight:900;opacity:.35;line-height:1}
+  .step .drv{font-size:18px;font-weight:800;margin-top:8px}
+  .step .team{font-size:12px;font-weight:700;margin-top:3px;opacity:.95}
+  .s1{min-height:180px} .s2{min-height:140px} .s3{min-height:118px}
+  .crown{position:absolute;top:-26px;left:50%;transform:translateX(-50%);font-size:22px}
+  .dark{margin:14px auto 0;max-width:680px;background:var(--card2);border:1px dashed var(--line);
+    border-radius:12px;padding:10px 14px;font-size:13px}
+  .dark b{color:var(--gold)}
+  .dark .dkr{margin-top:6px;color:#b9c4d2;font-size:12.5px;line-height:1.6}
+  .why{margin-top:16px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:15px 17px;
+    font-size:13.5px;line-height:1.75;color:#cdd6e0}
+  /* swing factors */
+  .swing{margin-top:26px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+  .swing h3{font-size:16px;margin-bottom:12px}
+  .sf{display:flex;gap:11px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.6}
+  .sf:last-child{border:none}
+  .sf .ic{font-size:16px;flex-shrink:0}
+  .sf b{color:#fff}
+  footer{margin-top:26px;color:var(--muted);font-size:11.5px;line-height:1.7;border-top:1px solid var(--line);padding-top:16px}
+  footer a{color:#7db3ff;text-decoration:none}
+  .grid-list{font-size:12.5px;color:#cdd6e0;line-height:1.9}
+  .gnum{display:inline-block;width:22px;color:var(--muted);font-weight:700}
+  /* ---- 3D track section ---- */
+  .t3dsec{margin-top:26px}
+  .t3dsec h3{font-size:16px;margin-bottom:6px}
+  .t3dhint{color:var(--muted);font-size:12px;margin-bottom:12px}
+  #app{display:flex;height:720px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  #side{width:340px;min-width:340px;height:100%;background:var(--panel);
+    border-right:1px solid var(--line);display:flex;flex-direction:column}
+  #side header{padding:14px 18px 12px;border-bottom:1px solid var(--line)}
+  #side header .sub{color:var(--muted);font-size:12px;line-height:1.5}
+  .legend{display:flex;gap:8px;padding:12px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .lg{display:flex;align-items:center;gap:7px;background:var(--panel2);
+    padding:6px 10px;border-radius:20px;font-size:12px;font-weight:600}
+  .dot{width:12px;height:12px;border-radius:50%}
+  .list{overflow-y:auto;flex:1;padding:8px 12px 20px;position:relative}
+  .zone{display:flex;gap:12px;padding:11px 12px;border-radius:11px;cursor:pointer;
+    border:1px solid transparent;transition:.15s;align-items:flex-start}
+  .zone:hover{background:var(--panel2)}
+  .zone.active{background:var(--panel2);border-color:var(--line)}
+  .zbar{width:5px;border-radius:4px;align-self:stretch;min-height:38px}
+  .zhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .ztag{font-weight:800;font-size:14px}
+  .zname{color:var(--muted);font-size:12px}
+  .badge{font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;color:#03121a}
+  .zwhy{color:#b9c4d2;font-size:12px;line-height:1.6;margin-top:5px;display:none}
+  .zone.active .zwhy{display:block}
+  .controls{padding:10px 18px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap;background:var(--panel)}
+  .btn{background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+    font-size:12px;font-weight:600;padding:8px 12px;border-radius:9px;cursor:pointer}
+  .btn:hover{border-color:#3a4658}
+  .btn.on{background:#1f6feb22;border-color:#1f6feb;color:#7db3ff}
+  #scene{flex:1;position:relative;min-width:0}
+  #c{display:block;width:100%;height:100%}
+  #labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .lab{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;cursor:pointer;
+    font-size:11px;font-weight:800;color:#03121a;padding:3px 8px;border-radius:8px;white-space:nowrap;
+    box-shadow:0 2px 8px #0008;border:1.5px solid #ffffff55;transition:transform .12s}
+  .lab:hover{transform:translate(-50%,-50%) scale(1.12)}
+  .hint{position:absolute;left:14px;bottom:12px;color:var(--muted);font-size:11px;
+    background:#0a0e14aa;padding:6px 10px;border-radius:8px;border:1px solid var(--line);backdrop-filter:blur(4px)}
+  .tt{position:absolute;top:14px;right:14px;background:#0a0e14cc;border:1px solid var(--line);
+    border-radius:12px;padding:14px 16px;width:270px;backdrop-filter:blur(6px);display:none}
+  .tt.show{display:block}
+  .tt h3{font-size:15px;margin-bottom:4px}
+  .tt .nm{color:var(--muted);font-size:12px;margin-bottom:8px}
+  .tt .car{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:13px;margin-bottom:8px}
+  .tt p{font-size:12.5px;line-height:1.65;color:#cdd6e0}
+  .tt .en{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
+  @media(max-width:720px){
+    .facts{grid-template-columns:1fr}.podium{max-width:100%}
+    #app{flex-direction:column;height:auto}
+    #side{width:100%;min-width:0;max-height:340px;border-right:none;border-bottom:1px solid var(--line)}
+    #scene{height:420px;flex:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="kik">🏁 Formula 1 · 시즌 11번째 경기 / 22 · Hungaroring</div>
+    <h1>2026 헝가리 GP — 누가 시상대에 오를까</h1>
+    <div class="meta">결승 <b>7월 26일(일) 오후 3시</b> 현지 · 70바퀴 · 한 바퀴 4.381km · 여름 휴식기 전 마지막 경기 · 챔피언십은 <b>안토넬리 204점 선두</b>(해밀턴 −45 · 러셀 −50) · <b>AI 에이전트 19개</b>가 출발 순서·연습 기록·날씨·타이어·팀 상태·역사 기록을 모으고, 중요한 사실 4가지는 <b>일부러 반박해 보며 다시 확인</b>했어요 · 아래 3가지 경우로 정리 · 페이지 아래엔 <a href="#track3d" style="color:#7db3ff;text-decoration:none">코너별 최강 차 3D 트랙 ↓</a></div>
+  </header>
+
+  <!-- VERIFIED FACTS -->
+  <div class="facts">
+    <div class="fact">
+      <h4>✅ 확정 출발 순서 (벌점 2명 반영)</h4>
+      <div class="grid-list">
+        <span class="gnum">P1</span><b style="color:var(--mcl)">노리스</b> · 1번 출발(폴) 1:17.207<br>
+        <span class="gnum">P2</span><span style="color:var(--fer)">르클레르</span> <span style="color:var(--muted)">(예선 3위 · +0.238)</span> · <span class="gnum">P3</span><span style="color:var(--mcl)">피아스트리</span><br>
+        <span class="gnum">P4</span><span style="color:var(--rbr)">베르스타펜</span> <span style="color:var(--muted)">(예선 막판 스핀)</span><br>
+        <span class="gnum">P5</span><span style="color:var(--fer)">해밀턴</span> <span style="color:var(--muted)">(예선 2위 · 0.012초 차 → 벌점 3계단)</span><br>
+        <span class="gnum">P6</span><span style="color:var(--mer)">러셀</span> · <span class="gnum">P7</span><span style="color:var(--mer)">안토넬리</span> <span style="color:var(--muted)">(예선 4위 → 벌점 3계단)</span> · <span class="gnum">P8</span><span style="color:var(--rbr)">하자르</span><br>
+        <span style="color:var(--muted);font-size:11px">벌점: <b style="color:#cdd6e0">해밀턴</b>(예선에서 피아스트리 방해) · <b style="color:#cdd6e0">안토넬리</b>(노란 깃발에서 덜 감속). 러셀은 냉각수 누수로 엔진 교체 — 같은 사양이라 벌점 없음. 메르세데스의 시즌 10연속 폴 행진이 여기서 끊겼어요.</span>
+      </div>
+    </div>
+    <div class="fact">
+      <h4>🌤 레이스 날씨</h4>
+      <div class="big">맑음 33°C · 비 확률 2~8%</div>
+      <div class="sub">노면 <b style="color:#ff8a3d">50°C 이상</b>(토요일 실측 53°C) · 남서풍 17~19km/h · 습도 22%<br>사실상 완전한 마른 경기. 비구름 본대는 경기가 끝난 저녁에야 도착 전망<br>→ 더위 탓에 <b style="color:var(--txt)">타이어가 닳아 느려지는 정도가 예상보다 큼</b>. 한 번 정차와 두 번 정차의 총 시간이 같다는 게 피렐리 공식 계산</div>
+    </div>
+    <div class="fact">
+      <h4>⏱ 진짜 레이스 속도 (금요일 연습 보정)</h4>
+      <div class="sub">
+        1. <b style="color:var(--mer)">안토넬리</b> — 기준<br>
+        2. <span style="color:var(--fer)">르클레르</span> +0.46초/랩 · 3. <span style="color:var(--mcl)">노리스</span> +0.52<br>
+        4. <span style="color:var(--mer)">러셀</span> +0.61 · 5. <span style="color:var(--fer)">해밀턴</span> +0.67 · 6. <span style="color:var(--rbr)">베르스타펜</span> +0.82<br>
+        <span style="color:var(--muted);font-size:11px">※ 한 매체의 보정 계산이라 <b style="color:#ff8a3d">확인필요</b>. 실측만 보면 베르스타펜(미디엄 평균 1:24.447)과 르클레르(소프트 1:24.186)가 최속 — 서열이 매체마다 엇갈려요.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENARIO TABS -->
+  <div class="tabs" id="tabs"></div>
+  <div class="panel" id="panel"></div>
+
+  <!-- SWING FACTORS -->
+  <div class="swing">
+    <h3>🎚 결과를 가르는 핵심 변수</h3>
+    <div class="sf"><span class="ic">🛣️</span><div><b>앞자리가 곧 무기</b> — 이 서킷은 추월이 한 경기에 24번 정도뿐이에요. 그마저 86%가 추월 보조장치(DRS) 덕분입니다. 타이어 한 번 갈면 약 21초를 잃어요. 그래서 출발 순서가 좋은 쪽이 절대적으로 유리합니다.</div></div>
+    <div class="sf"><span class="ic">🌡️</span><div><b>노면 50도의 더위</b> — 기온 33도, 노면은 50도가 넘어요. 타이어가 닳아 느려지는 정도가 예상보다 큽니다. 피렐리 계산으로는 한 번 정차와 두 번 정차의 총 시간이 같아요. 어느 쪽을 고르느냐가 순위를 가릅니다.</div></div>
+    <div class="sf"><span class="ic">🔋</span><div><b>메르세데스의 아픈 손가락</b> — 챔피언십 선두 팀인데 배터리 쪽 고장이 반복됐어요. 캐나다에서 러셀이 선두로 달리다 멈췄고, 안토넬리도 바르셀로나에서 전기 계통이 꺼져 리타이어(완주 실패)했습니다. 러셀은 이번에 벌점 없이 쓸 수 있는 마지막 엔진으로 달려요.</div></div>
+    <div class="sf"><span class="ic">🚦</span><div><b>첫 바퀴 1코너를 조심</b> — 2017년, 2021년, 2023년 모두 첫 바퀴 1코너에서 여러 대가 부딪혔어요. 이번엔 점수가 급한 해밀턴(5번째)과, 직전 경기에서 그와 부딪혔던 러셀(6번째)이 같은 구간에서 출발합니다.</div></div>
+    <div class="sf"><span class="ic">📊</span><div><b>레이스 속도 데이터가 엇갈린다</b> — 보정 계산으로는 안토넬리가 1위, 베르스타펜이 꼴찌급이에요. 그런데 실측 기록으로는 베르스타펜이 미디엄 타이어 최속이었습니다. 어느 쪽이 진짜인지는 오늘 경기가 알려줘요.</div></div>
+    <div class="sf"><span class="ic">🏆</span><div><b>폴시터의 저주</b> — 이 서킷에서 1번 출발(폴)이 우승으로 이어진 건 역대 41%뿐이에요. 최근 5년은 연속으로 폴시터가 졌습니다. 노리스가 이 흐름을 끊을 수 있을지가 관전 포인트예요.</div></div>
+  </div>
+
+  <!-- 3D TRACK -->
+  <div class="t3dsec" id="track3d">
+    <h3>🌐 코너별 최강 차 — 헝가로링 3D 트랙</h3>
+    <div class="t3dhint">14코너 / 높낮이 ≈35m (출발 직선이 능선 꼭대기 → T3 부근이 계곡 바닥, 완만한 계곡 왕복) · 각 구간 색 = 그 구간에서 가장 강한 팀 · 드래그=회전 · 휠=줌 · 구간/코너 클릭=상세</div>
+    <div id="app">
+      <aside id="side">
+        <header>
+          <div class="sub">각 구간에 <b style="color:var(--txt)">이번 주말 검증된 데이터(예선 섹터·연습 기록) 기준</b> 가장 강한 차 · <b>이번 주말 핵심: 맥라렌 대형 업그레이드가 중간 섹터를 지배</b></div>
+        </header>
+        <div class="legend" id="legend"></div>
+        <div class="list" id="list"></div>
+        <div class="controls">
+          <button class="btn" id="bRotate">⟳ 자동회전</button>
+          <button class="btn on" id="bLabels">🏷 코너라벨</button>
+          <button class="btn" id="bExag">⛰ 높낮이 강조</button>
+          <button class="btn" id="bReset">⊙ 시점초기화</button>
+        </div>
+      </aside>
+      <div id="scene">
+        <canvas id="c"></canvas>
+        <div id="labels"></div>
+        <div class="hint">드래그=회전 · 휠=줌 · 우클릭드래그=이동 · 코너 클릭=상세</div>
+        <div class="tt" id="tt"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <b>어떻게 만들었나</b> — 8개 분야를 동시에 조사(출발 순서·연습 레이스 페이스·날씨·타이어·최근 폼·팀 동향·역사 기록·신뢰성/순위)한 뒤, 결과를 가장 크게 좌우할 사실 4개는 <b>"틀렸다고 반박해 보는"</b> 방식으로 독립 출처와 다시 검증했어요(최종 출발 순서 <i>확인됨</i> · 안토넬리 보정 레이스 페이스 1위 <i>확인필요 — 단일 출처, 실측과 상충</i> · 마른 경기 + 더위 + 정차 1회=2회 동률 <i>확인됨(피렐리 공식)</i> · 메르세데스 배터리 리스크 <i>확인됨</i>). 그다음 시각이 다른 예측가 4명(데이터·전략/타이어·돌발변수·역사)의 예측을 합쳤습니다. 총 19 에이전트(코너 분석 포함). 세 경우의 확률 합 = 100% (정상 68 / 돌발 27 / 우천 5).
+    <br>참고: 헝가리는 22라운드 중 11번째, 여름 휴식기 전 마지막 경기예요. 스프린트 없는 일반 주말입니다. 올해 트랙은 T1·T12가 재포장됐는데 노면이 부서져 금요일 밤 긴급 보수를 했어요 — 타이어 마모를 키우는 변수입니다.
+    <br>3D 트랙 참고: 트랙 모양·높낮이는 실제 배치를 참고한 <b>간략(스타일라이즈드) 3D</b>예요. 헝가로링은 스파 같은 산악 코스가 아니라, 출발 직선 능선과 T3 부근 계곡 바닥 사이 약 35m(F1 공식 34.7m)를 오르내리는 완만한 지형입니다. 코너별 최강 차는 이번 주말 실제 데이터(예선 섹터 기록, 금요일 연습, 업그레이드 효과)를 근거로 했어요.
+    <br>출처: <a href="https://www.formula1.com/en/racing/2026/hungary">Formula1.com</a>, The Race, Motorsport.com, Autosport, PlanetF1, RacingNews365, Sky Sports, Crash.net, GPFans, ESPN, Pirelli(공식 보도자료), Open-Meteo(기상 API), GPblog, Scuderia Fans, Coffee Corner Motorsport, Lights Out Blog, Driver61, f1-circuits.com, Wikipedia 등 (리서치·검증 에이전트가 실제 접근한 자료 90여 건 교차 확인).
+    <br><i>※ 이 예측은 확인된 사실을 바탕으로 한 확률적 판단이며, 실제 결과를 보장하지 않아요. 2026년 7월 26일 레이스 시작 전 기준.</i>
+  </footer>
+</div>
+
+<script>
+const TEAM = {
+  MER:{n:'Mercedes', c:'#27F4D2', t:'#06251f'},
+  FER:{n:'Ferrari',  c:'#FF2D2D', t:'#fff'},
+  RBR:{n:'Red Bull', c:'#3671C6', t:'#fff'},
+  MCL:{n:'McLaren',  c:'#FF8000', t:'#2a1500'},
+  RB:{n:'Racing Bulls', c:'#6692FF', t:'#06183a'},
+  AST:{n:'Aston Martin', c:'#229971', t:'#fff'},
+};
+const D = (drv,team)=>({drv,team});
+const SCENARIOS = [
+  { key:'dry', emoji:'🌤', name:'정상 (마른 경기)', lk:68, color:'var(--gold)',
+    tag:'출발 순서가 곧 결승 순서 — 폴시터 노리스가 지키는 판',
+    p1:D('노리스','MCL'), p2:D('르클레르','FER'), p3:D('안토넬리','MER'),
+    dark:D('베르스타펜','RBR'),
+    darkWhy:'베르스타펜은 예선 마지막에 스핀해서 4번째로 출발해요. 그런데 금요일 실측에서는 미디엄 타이어로 필드에서 가장 빠른 평균 랩(1분 24.4초)을 찍었습니다. 보정 순위에서 꼴찌급으로 나온 건 한 매체의 계산일 뿐이고, 다른 두 매체의 원본 데이터는 정반대를 가리켜요. 이 숨은 페이스가 진짜라면, 앞이 트인 상태에서 두 번 타이어를 갈아 치고 나가는 공격 전략으로 시상대까지 넘볼 수 있습니다.',
+    why:`이 서킷은 <b>추월이 한 경기에 24번 정도</b>밖에 안 나와요. 제대로 된 직선이 출발선 앞 하나뿐이라서죠. 타이어 한 번 갈면 약 21초를 잃으니, <b>앞자리에서 출발하는 것 자체가 가장 큰 무기</b>입니다.<br><br>폴시터 노리스는 이번에 팀이 가져온 대형 업그레이드로 예선에서 바로 1등(1분 17.207초)을 찍었어요. 레이스 페이스도 상위권이라, 2등 르클레르가 '먼저 타이어를 갈아 앞서기'를 시도해도 선두는 한 바퀴 뒤에 따라 들어가 막으면 됩니다. 게다가 3번째의 피아스트리가 팀 동료라서 방패 역할까지 해 줘요. 예측가 4명 중 3명이 노리스 우승에 표를 던졌습니다.<br><br>르클레르는 금요일 소프트 타이어 긴 주행에서 실측 최속(1분 24.186초)이었어요. 위협은 확실하지만, 트랙에서 앞차를 넘기가 워낙 어려워 2위가 현실적인 최대치입니다.<br><br>안토넬리는 7번째 출발이 발목을 잡아요. 하지만 금요일 보정 페이스가 전체 1위였고, 바로 앞 6번째가 팀 동료 러셀이라 길이 열려 있습니다. 더위 때문에 <b>한 번 정차와 두 번 정차의 총 시간이 같다</b>는 게 피렐리 공식 계산이라, 남들과 다른 전략으로 시간차 공격이 가능해요. 5번째 해밀턴과 4번째 베르스타펜을 차례로 처리하고 시상대 막차를 탄다는 그림입니다. 다만 이 페이스 서열은 한 매체 수치라, 우승까지는 무리로 봤어요.` },
+  { key:'chaos', emoji:'⚠️', name:'돌발 (사고·세이프티카)', lk:27, color:'#ff5d5d',
+    tag:'첫 코너 혼전이나 세이프티카 한 번이면 판이 뒤집힌다',
+    p1:D('안토넬리','MER'), p2:D('노리스','MCL'), p3:D('베르스타펜','RBR'),
+    dark:D('하자르','RBR'),
+    darkWhy:'하자르는 8번째에서 출발해요. 금요일 보정 페이스에서 팀 선배 베르스타펜보다 빠르게 집계된 신예입니다. 첫 코너에서 여러 대가 엉키고 세이프티카가 일찍 나오면, 공짜나 다름없는 타이어 교체로 단숨에 톱5까지 올라올 수 있어요. 올 시즌 벌써 60점을 쌓은 기세도 무시할 수 없습니다.',
+    why:`이 트랙의 세이프티카 확률은 <b>13%</b>, 속도 제한만 거는 가상 세이프티카는 <b>25%</b>예요. 그리고 사고는 첫 바퀴 1코너에 몰립니다 — 2017년, 2021년, 2023년 모두 첫 바퀴 1코너에서 여러 대가 부딪혔어요.<br><br>이번엔 불씨가 많아요. 챔피언십 45점 차를 뒤집어야 하는 <b>해밀턴(5번째)</b>과, 직전 경기에서 해밀턴과 부딪혀 리타이어했던 <b>러셀(6번째)</b>이 같은 구간에서 다시 만납니다. 러셀 차는 예선 중 냉각수가 새서 엔진을 갈았는데, 벌점 없이 쓸 수 있는 마지막 엔진이에요. 메르세데스는 올해 배터리 쪽 고장으로 다 잡은 경기를 두 번이나 날렸습니다.<br><br>중간에 세이프티카가 나오면 약 21초짜리 타이어 교체를 <b>절반 값에</b> 할 수 있어요. 이 리셔플의 최대 수혜자는 뒤에서 쫓아오는 가장 빠른 차 — 즉 7번째 출발의 안토넬리입니다. 시즌 6승의 압도적 폼에, 금요일 보정 페이스 1위였죠. 이 서킷 폴시터는 <b>5년 연속 우승에 실패</b>했고, 2021년 오콘은 8번째, 2022년 베르스타펜은 10번째에서 우승한 전례도 있어요.<br><br>노리스는 혼전에서도 앞자리 프리미엄으로 시상대는 지킵니다. 베르스타펜은 재출발에 강하고, 앞줄 페라리가 흔들리면 가장 먼저 줍는 자리에 있어요. 단, 혼돈이 안토넬리 본인(전기 계통 결함 전례 2건)을 삼키면 우승은 그대로 노리스 몫입니다.` },
+  { key:'wet', emoji:'🌧', name:'만약 비가 끼어들면', lk:5, color:'#5db4ff',
+    tag:'예보상 거의 없는 일 — 만약 소나기가 일찍 도착한다면',
+    p1:D('안토넬리','MER'), p2:D('베르스타펜','RBR'), p3:D('노리스','MCL'),
+    dark:D('알론소','AST'),
+    darkWhy:'알론소는 17번째에서 출발하지만, 이번 주말 사실상 신차급 업그레이드를 받았어요. 비가 오면 차 성능 차이가 줄고 노련미가 돈이 됩니다. 2021년 이 서킷 우천 혼전에서 해밀턴을 몇 바퀴나 막아내며 오콘의 우승을 만든 게 바로 알론소예요. 타이어 갈아타는 타이밍 도박 한 번이면 점수권 깊숙이, 운이 크게 따르면 그 이상도 가능합니다.',
+    why:`먼저 분명히 할게요. <b>오늘 레이스 중 비 확률은 매우 낮습니다.</b> 기상 데이터 기준 2~8%, 예상 강수량 0mm예요. 비구름 본대는 경기가 끝난 저녁에야 도착할 전망입니다. 그래서 이 시나리오는 5%짜리 가정이에요.<br><br>그래도 유럽을 지나는 폭풍이 예보보다 빨리 움직여 <b>레이스 후반 소나기</b>가 닥친다면 판이 완전히 바뀝니다. 이 서킷의 우천 경기는 역대 5번뿐인데, 그때마다 이변이 났어요 — 2006년엔 버튼이 14번째 출발로 우승했습니다.<br><br>비가 오면 출발 순서의 가치가 사라지고 <b>차의 순수 페이스와 드라이버 기량</b>이 전부가 돼요. 그 기준 1순위는 시즌 6승에 보정 페이스 1위인 안토넬리입니다. 7번째 출발이라는 핸디캡이 비와 함께 지워져요.<br><br>베르스타펜은 빗길에서 유난히 강한 드라이버로 꼽혀 왔고, 미끄러운 노면의 재출발 싸움에서 가장 무섭습니다. 노리스는 앞자리 이점으로 시상대는 지키지만, 빗길에선 선두가 뒤차의 타이어 선택을 보고 움직일 수 없어 불리해지는 순간이 와요. 르클레르와 페라리는 빗길 전략 판단에서 실수가 잦았던 이력이 감점 요인입니다.` },
+];
+
+function chip(d){const t=TEAM[d.team];return `<div class="drv">${d.drv}</div><div class="team" style="color:${t.c}">${t.n}</div>`;}
+
+const tabsEl=document.getElementById('tabs');
+SCENARIOS.forEach((s,i)=>{
+  const el=document.createElement('div');el.className='tab'+(i===0?' on':'');el.dataset.i=i;
+  el.innerHTML=`<div class="nm">${s.emoji} ${s.name}</div>
+    <div class="lk">일어날 확률 ≈ ${s.lk}%</div>
+    <div class="bar"><i style="width:${s.lk}%;background:${s.key==='chaos'?'linear-gradient(90deg,#ff5d5d,#ffae3d)':s.key==='wet'?'linear-gradient(90deg,#5db4ff,#7ad4ff)':'linear-gradient(90deg,var(--gold),#ff8a3d)'}"></i></div>`;
+  el.onclick=()=>render(i);
+  tabsEl.appendChild(el);
+});
+
+function render(i){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',+t.dataset.i===i));
+  const s=SCENARIOS[i];
+  const t1=TEAM[s.p1.team],t2=TEAM[s.p2.team],t3=TEAM[s.p3.team],td=TEAM[s.dark.team];
+  document.getElementById('panel').innerHTML=`
+    <div class="ph"><h2>${s.emoji} ${s.name} <span style="color:var(--muted);font-weight:600">· ≈${s.lk}%</span></h2>
+      <div class="tag">${s.tag}</div></div>
+    <div class="podium">
+      <div class="step s2" style="background:linear-gradient(180deg,${t2.c}cc,${t2.c}77);color:${t2.t}">
+        <div class="pos">2</div>${chip(s.p2)}</div>
+      <div class="step s1" style="background:linear-gradient(180deg,${t1.c},${t1.c}aa);color:${t1.t}">
+        <div class="crown">👑</div><div class="pos">1</div>${chip(s.p1)}</div>
+      <div class="step s3" style="background:linear-gradient(180deg,${t3.c}cc,${t3.c}66);color:${t3.t}">
+        <div class="pos">3</div>${chip(s.p3)}</div>
+    </div>
+    <div class="dark">🐎 <b>다크호스(뜻밖의 변수)</b> — ${s.dark.drv} <span style="color:${td.c};font-weight:700">(${td.n})</span>
+      <div class="dkr">${s.darkWhy}</div></div>
+    <div class="why">${s.why}</div>`;
+}
+render(0);
+</script>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ================= DATA ================= */
+const TEAMS = {
+  MER:{ name:'Mercedes', who:'안토넬리 · 러셀', color:'#27F4D2' },
+  FER:{ name:'Ferrari',  who:'르클레르 · 해밀턴', color:'#FF2D2D' },
+  RBR:{ name:'Red Bull', who:'베르스타펜 · 하자르', color:'#3671C6' },
+  MCL:{ name:'McLaren',  who:'노리스 · 피아스트리', color:'#FF8000' },
+};
+// zones in driving order; best = which 2026 car is strongest here
+const ZONES = [
+  { tag:'메인 직선', name:'출발-결승 직선 908m · 능선 꼭대기 · 최고속 ~310km/h', best:'MER',
+    why:'올해 가장 힘 좋은 엔진은 메르세데스예요. 배터리 힘 배분(직선에서 전기를 언제 쏟느냐)에도 여유가 가장 큽니다. 같은 엔진을 쓰는 맥라렌이 랩마다 세 번 가속을 늦출 때, 메르세데스는 끝까지 밀어붙일 수 있어요. 단, 이번 주말 코너를 포함한 첫 구간 기록 자체는 페라리가 빨랐습니다.',
+    en:"Mercedes' class-leading engine and energy deployment rule the 908m uphill-cresting main straight." },
+  { tag:'T1', name:'턴1 — 내리막 진입 저속 헤어핀(~120km/h) · 유일한 추월 포인트 · 올해 재포장', best:'FER',
+    why:'시속 310km에서 120km까지 줄이는 긴 브레이킹 구간이에요. 이번 주말 예선 기록에서 첫 구간은 일관되게 페라리가 가장 빨랐습니다. 해밀턴이 한때 폴 자리를 잡았을 만큼 초반 구간이 강해요. 추월이 거의 여기서만 나오고, 첫 바퀴 사고도 단골입니다.',
+    en:'Ferrari owned Sector 1 all weekend; the heavy braking into the resurfaced T1 hairpin is its turf.' },
+  { tag:'T2–T3', name:'턴2-3 — 내리막 왼쪽(~146km/h) → 계곡 바닥의 빠른 오른쪽(~230km/h)', best:'FER',
+    why:'첫 구간의 나머지 절반이에요. 예선 데이터에서 계속 페라리가 앞섰습니다. 턴2는 안쪽·바깥쪽 모두 노릴 수 있는 제2의 추월 지점이고, 트랙에서 가장 낮은 지대를 지나는 구간이에요.',
+    en:'The downhill T2 and fast T3 close out Sector 1, where Ferrari held the measured edge in qualifying.' },
+  { tag:'T4', name:'턴4 — 트랙 최고속 코너(~250km/h) · 앞이 안 보이는 오르막 왼쪽', best:'MCL',
+    why:'노리스의 폴 랩에서 중간 구간이 전체 최속이었어요. 금요일에도 빠른 코너에서는 맥라렌이 페라리보다 빨랐다는 분석이 있습니다. 이번에 가져온 대형 업그레이드(새 바닥·뒷날개)가 여기서 바로 효과를 냈어요.',
+    en:"McLaren's upgraded car was purple through the middle sector; T4 is its fastest showcase corner." },
+  { tag:'T5', name:'턴5 — 길게 도는 중속 오른쪽(~185km/h) · 오르막 이어짐', best:'MCL',
+    why:'중간 구간의 시작이에요. 예선에서 맥라렌이 가장 빨랐던 구간에 속합니다. 긴 코너에서 앞타이어에 오래 힘이 실리는데, 연속 코너에 강한 맥라렌의 장점이 그대로 통해요.',
+    en:'The long medium-speed T5 opens the combination-corner stretch where McLaren was consistently quickest.' },
+  { tag:'T6–T7', name:'턴6-7 시케인 — 저속 좌-우(~127→145km/h) · 연석 공략 필수', best:'MCL',
+    why:'연석을 타 넘는 저속 연속 코너예요. 이 구간이 포함된 중간 섹터 최강은 맥라렌이었습니다. 반대로 레드불은 이번 주말 내내 뒷바퀴 접지와 연석 처리에 불만이 많았고, 베르스타펜과 하자르 둘 다 스핀했어요.',
+    en:"Kerb-riding chicane in McLaren's strongest sector; Red Bull's traction weakness bites hardest here." },
+  { tag:'T8–T9', name:'턴8-9 — 오르막 중속 좌우 리듬 구간(~185~192km/h)', best:'MCL',
+    why:'방향 전환이 쉴 새 없이 이어지는 리듬 구간이에요. 맥라렌이 예선에서 가장 빨랐던 중간 구간의 한가운데입니다. 여기서 번 시간으로 노리스가 다른 데서 잃은 만큼을 되찾았다는 분석이 있어요.',
+    en:'The rhythmic uphill T8-9 sequence sits at the heart of McLaren’s sector-two dominance.' },
+  { tag:'T10–T11', name:'턴10-11 — 고속 오른쪽 연속(~240→250km/h) · 중간 구간 마무리', best:'MCL',
+    why:'트랙에서 두 번째로 빠른 코너 묶음이에요. 여전히 맥라렌이 지배한 중간 구간입니다. 금요일 데이터에서도 고속 코너는 맥라렌 우위였어요.',
+    en:'McLaren carried its middle-sector edge through the fast T10-11 sweeps.' },
+  { tag:'T12–T13', name:'턴12-13 — 중저속 우-좌(~130km/h) · 내리막 시작 · T12 재포장', best:'FER',
+    why:'예선에서 마지막 구간은 페라리가 우위였어요. 메르세데스는 여기서 고전했습니다. 안토넬리가 "마지막 구간에서 네 바퀴가 다 미끄러지고 접지가 전혀 없었다"고 말했을 정도예요.',
+    en:'Ferrari held the upper hand in the final sector while Mercedes complained of zero traction there.' },
+  { tag:'T14', name:'턴14 — 마지막 긴 오른쪽(~172km/h) · 오르막 가속으로 결승선 연결', best:'MCL',
+    why:'폴이 사실상 여기서 결정됐어요. 맥라렌은 기어 세팅이 가장 짧아 노리스가 4단을 유지한 반면, 해밀턴은 3단으로 떨어졌습니다. 배터리 힘 배분도 노리스가 더 좋았다는 예선 분석이 있어요. 랩 마무리 가속에서 맥라렌이 이득을 봅니다.',
+    en:"Norris won pole here: McLaren's shortest gear ratios kept him in fourth gear onto the uphill straight." },
+];
+// centerline waypoints (stylized Hungaroring). x,z = top-down, e = elevation in ~4m units above valley floor. z_ = zone index.
+const NODES = [
+  {x:40,  z:26,  e:8, z_:0, c:'S/F'},
+  {x:70,  z:23,  e:9, z_:0},
+  {x:100, z:22,  e:9, z_:0},
+  {x:126, z:23,  e:9, z_:0},
+  {x:148, z:27,  e:8, z_:1},
+  {x:159, z:36,  e:7, z_:1, c:'T1'},
+  {x:158, z:50,  e:5, z_:1},
+  {x:152, z:63,  e:3, z_:2, c:'T2'},
+  {x:155, z:77,  e:2, z_:2},
+  {x:162, z:91,  e:1, z_:2, c:'T3'},
+  {x:151, z:100, e:1, z_:2},
+  {x:135, z:104, e:2, z_:3},
+  {x:117, z:108, e:3, z_:3, c:'T4'},
+  {x:101, z:113, e:3, z_:4},
+  {x:87,  z:120, e:4, z_:4, c:'T5'},
+  {x:73,  z:115, e:4, z_:4},
+  {x:63,  z:107, e:4, z_:5, c:'T6-7'},
+  {x:55,  z:97,  e:4, z_:5},
+  {x:48,  z:86,  e:5, z_:6, c:'T8-9'},
+  {x:44,  z:75,  e:5, z_:6},
+  {x:42,  z:64,  e:6, z_:7, c:'T10-11'},
+  {x:40,  z:53,  e:6, z_:7},
+  {x:38,  z:43,  e:5, z_:8, c:'T12-13'},
+  {x:33,  z:35,  e:5, z_:8},
+  {x:27,  z:29,  e:6, z_:9, c:'T14'},
+  {x:31,  z:23,  e:7, z_:9},
+];
+
+/* ================= SETUP ================= */
+const canvas = document.getElementById('c');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#0a0e14');
+scene.fog = new THREE.Fog('#0a0e14', 380, 820);
+
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+
+const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 3000);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.maxPolarAngle = Math.PI*0.49;
+
+scene.add(new THREE.HemisphereLight('#bcd3ff','#0a0e14', 1.1));
+const dir = new THREE.DirectionalLight('#ffffff', 1.6);
+dir.position.set(120,260,80); scene.add(dir);
+
+/* center the layout */
+let cx=0,cz=0; NODES.forEach(n=>{cx+=n.x;cz+=n.z}); cx/=NODES.length; cz/=NODES.length;
+let EXAG = 1.8;
+function nodeVec(n){ return new THREE.Vector3(n.x-cx, n.e*EXAG, n.z-cz); }
+
+const trackGroup = new THREE.Group();
+scene.add(trackGroup);
+
+const colMER=new THREE.Color(TEAMS.MER.color), colFER=new THREE.Color(TEAMS.FER.color),
+      colRBR=new THREE.Color(TEAMS.RBR.color), colMCL=new THREE.Color(TEAMS.MCL.color);
+function zoneColor(zi){ const b=ZONES[zi].best; return b==='MER'?colMER:b==='FER'?colFER:b==='RBR'?colRBR:colMCL; }
+
+let curve, samples, sampleZone, ribbonMesh, curtainMesh, highlightMesh;
+
+function buildTrack(){
+  // clear
+  while(trackGroup.children.length) trackGroup.remove(trackGroup.children[0]);
+  const pts = NODES.map(nodeVec);
+  curve = new THREE.CatmullRomCurve3(pts, true, 'centripetal');
+  const N = 900;
+  samples = curve.getSpacedPoints(N);
+  // assign each sample a zone via nearest node
+  const nodePos = pts;
+  sampleZone = samples.map(s=>{
+    let bi=0,bd=1e9;
+    for(let i=0;i<nodePos.length;i++){const d=s.distanceToSquared(nodePos[i]); if(d<bd){bd=d;bi=i;}}
+    return NODES[bi].z_;
+  });
+
+  const hw = 3.6;            // half track width
+  const up = new THREE.Vector3(0,1,0);
+  const pos=[], col=[], idx=[];
+  const cpos=[], ccol=[];    // curtain (centerline -> base)
+  const baseY = -2;
+  const tmpDir=new THREE.Vector3(), right=new THREE.Vector3();
+  for(let i=0;i<=N;i++){
+    const p=samples[i], pn=samples[(i+1)%(N+1)];
+    tmpDir.subVectors(pn,p).normalize();
+    right.crossVectors(tmpDir,up).normalize().multiplyScalar(hw);
+    pos.push(p.x-right.x, p.y, p.z-right.z);
+    pos.push(p.x+right.x, p.y, p.z+right.z);
+    const c=zoneColor(sampleZone[i]);
+    col.push(c.r,c.g,c.b, c.r,c.g,c.b);
+    cpos.push(p.x, p.y, p.z); cpos.push(p.x, baseY, p.z);
+    const cc=c.clone().multiplyScalar(0.55);
+    ccol.push(cc.r,cc.g,cc.b, cc.r,cc.g,cc.b);
+  }
+  for(let i=0;i<N;i++){
+    const a=i*2, b=i*2+1, c2=i*2+2, d=i*2+3;
+    idx.push(a,b,d, a,d,c2);
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+  g.setIndex(idx); g.computeVertexNormals();
+  ribbonMesh=new THREE.Mesh(g,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.55,metalness:.15,side:THREE.DoubleSide}));
+  trackGroup.add(ribbonMesh);
+
+  // emissive glow copy
+  const g2=g.clone();
+  const glow=new THREE.Mesh(g2,new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:.18,side:THREE.DoubleSide}));
+  glow.position.y=0.3; trackGroup.add(glow);
+
+  // curtain
+  const cg=new THREE.BufferGeometry();
+  cg.setAttribute('position',new THREE.Float32BufferAttribute(cpos,3));
+  cg.setAttribute('color',new THREE.Float32BufferAttribute(ccol,3));
+  const cidx=[]; for(let i=0;i<N;i++){const a=i*2,b=i*2+1,c2=i*2+2,d=i*2+3; cidx.push(a,b,d,a,d,c2);}
+  cg.setIndex(cidx);
+  curtainMesh=new THREE.Mesh(cg,new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:.16,side:THREE.DoubleSide,depthWrite:false}));
+  trackGroup.add(curtainMesh);
+
+  // base grid
+  const grid=new THREE.GridHelper(480,32,0x1b2433,0x141a24);
+  grid.position.y=baseY-0.1; trackGroup.add(grid);
+
+  // start/finish line marker
+  const sf=samples[0];
+  const sfGeo=new THREE.BoxGeometry(hw*2.4,0.6,2.2);
+  const sfMesh=new THREE.Mesh(sfGeo,new THREE.MeshBasicMaterial({color:0xffffff}));
+  sfMesh.position.copy(sf); sfMesh.position.y+=0.5; trackGroup.add(sfMesh);
+
+  // corner marker poles
+  NODES.forEach((n)=>{ if(!n.c) return;
+    const v=nodeVec(n);
+    const c=zoneColor(n.z_);
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(.35,.35,9,8),
+      new THREE.MeshBasicMaterial({color:c}));
+    pole.position.set(v.x, v.y+4.5, v.z); trackGroup.add(pole);
+    const ball=new THREE.Mesh(new THREE.SphereGeometry(1.4,16,16),
+      new THREE.MeshStandardMaterial({color:c,emissive:c,emissiveIntensity:.6}));
+    ball.position.set(v.x, v.y+9.5, v.z); trackGroup.add(ball);
+  });
+}
+buildTrack();
+
+/* ---- moving car dot ---- */
+const car=new THREE.Mesh(new THREE.SphereGeometry(2.0,18,18),
+  new THREE.MeshStandardMaterial({color:'#fff',emissive:'#fff',emissiveIntensity:.5}));
+scene.add(car);
+let carT=0;
+
+/* ================= LABELS (HTML overlay) ================= */
+const labelsEl=document.getElementById('labels');
+let labelObjs=[];
+function buildLabels(){
+  labelObjs=[]; labelsEl.innerHTML='';
+  NODES.forEach((n)=>{ if(!n.c) return;
+    const el=document.createElement('div');
+    el.className='lab';
+    el.textContent=n.c;
+    const best=ZONES[n.z_].best;
+    el.style.background=TEAMS[best].color;
+    if(n.c==='S/F'){el.style.background='#e6edf3';}
+    el.title=ZONES[n.z_].tag+' — '+TEAMS[ZONES[n.z_].best].name;
+    el.addEventListener('click',()=>selectZone(n.z_));
+    labelsEl.appendChild(el);
+    labelObjs.push({el, pos:nodeVec(n).clone().setY(nodeVec(n).y+12)});
+  });
+}
+buildLabels();
+let showLabels=true;
+
+function updateLabels(){
+  const w=labelsEl.clientWidth, h=labelsEl.clientHeight;
+  labelObjs.forEach(o=>{
+    const p=o.pos.clone().project(camera);
+    const vis = p.z<1 && showLabels;
+    o.el.style.display = vis?'block':'none';
+    if(!vis) return;
+    o.el.style.left=((p.x*0.5+0.5)*w)+'px';
+    o.el.style.top=((-p.y*0.5+0.5)*h)+'px';
+    o.el.style.opacity = THREE.MathUtils.clamp(1.2-p.z,0.35,1);
+  });
+}
+
+/* ================= SIDE PANEL ================= */
+const legend=document.getElementById('legend');
+Object.entries(TEAMS).forEach(([k,t])=>{
+  const d=document.createElement('div'); d.className='lg';
+  d.innerHTML=`<span class="dot" style="background:${t.color}"></span>${t.name}<span style="color:var(--muted);font-weight:400">·${t.who}</span>`;
+  legend.appendChild(d);
+});
+const listEl=document.getElementById('list');
+ZONES.forEach((z,zi)=>{
+  const t=TEAMS[z.best];
+  const el=document.createElement('div'); el.className='zone'; el.dataset.zone=zi;
+  el.innerHTML=`<div class="zbar" style="background:${t.color}"></div>
+    <div style="flex:1">
+      <div class="zhead">
+        <span class="ztag">${z.tag}</span>
+        <span class="badge" style="background:${t.color}">${t.name}</span>
+      </div>
+      <div class="zname">${z.name}</div>
+      <div class="zwhy">${z.why}<br><span style="color:var(--muted)">${z.en}</span></div>
+    </div>`;
+  el.addEventListener('click',()=>selectZone(zi));
+  listEl.appendChild(el);
+});
+
+const tt=document.getElementById('tt');
+let activeZone=-1;
+function selectZone(zi){
+  activeZone=zi;
+  document.querySelectorAll('.zone').forEach(e=>e.classList.toggle('active', +e.dataset.zone===zi));
+  // scroll only the zone list, never the page (scrollIntoView would drag the page to this section)
+  const active=document.querySelector('.zone.active');
+  if(active) listEl.scrollTo({top: Math.max(0, active.offsetTop - listEl.clientHeight/2 + active.offsetHeight/2), behavior:'smooth'});
+  const z=ZONES[zi], t=TEAMS[z.best];
+  tt.className='tt show';
+  tt.innerHTML=`<h3>${z.tag}</h3><div class="nm">${z.name}</div>
+    <div class="car" style="color:${t.color}"><span class="dot" style="background:${t.color}"></span>가장 강한 차: ${t.name} <span style="color:var(--muted);font-weight:500">(${t.who})</span></div>
+    <p>${z.why}</p><div class="en">${z.en}</div>`;
+  buildHighlight(zi);
+}
+function buildHighlight(zi){
+  if(highlightMesh){trackGroup.remove(highlightMesh);highlightMesh.geometry.dispose();highlightMesh=null;}
+  const N=samples.length-1, hw=4.8, up=new THREE.Vector3(0,1,0);
+  const pos=[],idx=[],tmpDir=new THREE.Vector3(),right=new THREE.Vector3();
+  let count=0, map=[];
+  for(let i=0;i<=N;i++){ if(sampleZone[i]!==zi){map.push(-1);continue;}
+    const p=samples[i],pn=samples[(i+1)%(N+1)];
+    tmpDir.subVectors(pn,p).normalize(); right.crossVectors(tmpDir,up).normalize().multiplyScalar(hw);
+    pos.push(p.x-right.x,p.y+0.6,p.z-right.z); pos.push(p.x+right.x,p.y+0.6,p.z+right.z);
+    map.push(count); count++;
+  }
+  for(let i=0;i<N;i++){ if(map[i]>=0 && map[i+1]>=0){const a=map[i]*2,b=map[i]*2+1,c=map[i+1]*2,d=map[i+1]*2+1; idx.push(a,b,d,a,d,c);} }
+  if(!pos.length) return;
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); g.setIndex(idx);
+  highlightMesh=new THREE.Mesh(g,new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.85,side:THREE.DoubleSide}));
+  trackGroup.add(highlightMesh);
+}
+
+/* ================= CAMERA FIT ================= */
+function fit(){
+  const box=new THREE.Box3().setFromObject(ribbonMesh);
+  const c=box.getCenter(new THREE.Vector3()), s=box.getSize(new THREE.Vector3());
+  controls.target.copy(c);
+  const r=Math.max(s.x,s.z);
+  camera.position.set(c.x - r*0.15, c.y + r*0.95, c.z + r*1.15);
+  camera.near=0.5; camera.far=r*12; camera.updateProjectionMatrix();
+}
+fit();
+
+/* ================= CONTROLS UI ================= */
+let auto=false;
+document.getElementById('bRotate').onclick=e=>{auto=!auto;e.target.classList.toggle('on',auto);};
+document.getElementById('bLabels').onclick=e=>{showLabels=!showLabels;e.target.classList.toggle('on',showLabels);};
+document.getElementById('bReset').onclick=()=>{fit();};
+document.getElementById('bExag').onclick=e=>{
+  EXAG = EXAG>1.8 ? 1.8 : 3.4; e.target.classList.toggle('on',EXAG>1.8);
+  buildTrack(); buildLabels();
+  if(activeZone>=0) buildHighlight(activeZone);
+};
+
+/* ================= RESIZE / LOOP ================= */
+function resize(){
+  const w=canvas.clientWidth,h=canvas.clientHeight;
+  if(canvas.width!==w*Math.min(devicePixelRatio,2)||canvas.height!==h*Math.min(devicePixelRatio,2)){
+    renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
+  }
+}
+function loop(){
+  requestAnimationFrame(loop);
+  resize();
+  if(auto) controls.autoRotate=true, controls.autoRotateSpeed=0.6; else controls.autoRotate=false;
+  controls.update();
+  carT=(carT+0.0011)%1;
+  const cp=curve.getPointAt(carT); car.position.copy(cp); car.position.y+=2.2;
+  let bi=0,bd=1e9; for(let i=0;i<NODES.length;i++){const v=nodeVec(NODES[i]);const d=cp.distanceToSquared(v);if(d<bd){bd=d;bi=i;}}
+  const cc=zoneColor(NODES[bi].z_); car.material.color.copy(cc); car.material.emissive.copy(cc);
+  if(highlightMesh){highlightMesh.material.opacity=0.55+0.35*Math.abs(Math.sin(performance.now()*0.004));}
+  updateLabels();
+  renderer.render(scene,camera);
+}
+loop();
+selectZone(1); // open with T1 — the only real overtaking spot
+</script>
+</body>
+</html>
